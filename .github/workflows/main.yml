@@ -1,0 +1,31 @@
+name: Publish to nuget
+on:
+  push:
+    branches:
+      - master # Default release branch
+jobs:
+  publish:
+    name: Build, pack & publish
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.x"
+          include-prerelease: true
+
+      # Publish
+      - name: Publish RazorEngineCore on version change
+        uses: alirezanet/publish-nuget@v3.1.0
+        with:
+          # Filepath of the project to be packaged, relative to root of repository
+          PROJECT_FILE_PATH: RazorEngineCore/RazorEngineCore.csproj
+
+          # NuGet package id, used for version detection & defaults to project name
+          # PACKAGE_NAME: Seq.App.Wechat
+
+          # Flag to toggle git tagging, enabled by default
+          TAG_COMMIT: false
+
+          # API key to authenticate with NuGet server
+          NUGET_KEY: ${{secrets.ETSOONugetKey}}

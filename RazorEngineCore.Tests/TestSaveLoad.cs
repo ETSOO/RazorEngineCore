@@ -12,17 +12,17 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestSaveToStream()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate initialTemplate = razorEngine.Compile("Hello @Model.Name");
+            var razorEngine = new RazorEngine();
+            var initialTemplate = razorEngine.Compile<TestNameModel>("Hello @Model.Name", cancellationToken: TestContext.CancellationToken);
             
-            MemoryStream memoryStream = new MemoryStream();
+            using var memoryStream = new MemoryStream();
             initialTemplate.SaveToStream(memoryStream);
             memoryStream.Position = 0;
 
-            IRazorEngineCompiledTemplate loadedTemplate = RazorEngineCompiledTemplate.LoadFromStream(memoryStream);
+            var loadedTemplate = RazorEngineCompiledTemplate<TestNameModel>.LoadFromStream(memoryStream);
 
-            string initialTemplateResult = initialTemplate.Run(new { Name = "Alex" });
-            string loadedTemplateResult = loadedTemplate.Run(new { Name = "Alex" });
+            var initialTemplateResult = initialTemplate.Run(new TestNameModel { Name = "Alex" });
+            var loadedTemplateResult = loadedTemplate.Run(new TestNameModel { Name = "Alex" });
             
             Assert.AreEqual(initialTemplateResult, loadedTemplateResult);
         }
@@ -30,17 +30,17 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestSaveToStreamAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate initialTemplate = await razorEngine.CompileAsync("Hello @Model.Name");
-            
-            MemoryStream memoryStream = new MemoryStream();
+            var razorEngine = new RazorEngine();
+            var initialTemplate = await razorEngine.CompileAsync<TestNameModel>("Hello @Model.Name", cancellationToken: TestContext.CancellationToken);
+
+            await using var memoryStream = new MemoryStream();
             await initialTemplate.SaveToStreamAsync(memoryStream);
             memoryStream.Position = 0;
 
-            IRazorEngineCompiledTemplate loadedTemplate = await RazorEngineCompiledTemplate.LoadFromStreamAsync(memoryStream);
+            var loadedTemplate = await RazorEngineCompiledTemplate<TestNameModel>.LoadFromStreamAsync(memoryStream);
 
-            string initialTemplateResult = await initialTemplate.RunAsync(new { Name = "Alex" });
-            string loadedTemplateResult = await loadedTemplate.RunAsync(new { Name = "Alex" });
+            var initialTemplateResult = await initialTemplate.RunAsync(new TestNameModel { Name = "Alex" });
+            var loadedTemplateResult = await loadedTemplate.RunAsync(new TestNameModel { Name = "Alex" });
             
             Assert.AreEqual(initialTemplateResult, loadedTemplateResult);
         }
@@ -48,40 +48,40 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestSaveToFile_Typed()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>> initialTemplate = razorEngine.Compile<RazorEngineTemplateBase<TestModel>>("Hello @Model.A @Model.C");
-            
+            var razorEngine = new RazorEngine();
+            var initialTemplate = razorEngine.Compile<RazorEngineTemplateBase<TestModel>, TestModel>("Hello @Model.A @Model.C", cancellationToken: TestContext.CancellationToken);
+
             initialTemplate.SaveToFile("testTemplate.dll");
 
-            IRazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>> loadedTemplate = RazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>>.LoadFromFile("testTemplate.dll");
+            var loadedTemplate = RazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>, TestModel>.LoadFromFile("testTemplate.dll");
 
-            Action<RazorEngineTemplateBase<TestModel>> action = initializer =>
+            static void action(RazorEngineTemplateBase<TestModel> initializer)
             {
                 initializer.Model = new TestModel()
                 {
                     A = 12345,
                     C = "Alex"
                 };
-            };
+            }
 
-            string initialTemplateResult = initialTemplate.Run(action);
-            string loadedTemplateResult = loadedTemplate.Run(action);
-            
+            var initialTemplateResult = initialTemplate.Run(action);
+            var loadedTemplateResult = loadedTemplate.Run(action);
+
             Assert.AreEqual(initialTemplateResult, loadedTemplateResult);
         }
         
         [TestMethod]
         public void TestSaveToFile_Anonymous()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate initialTemplate = razorEngine.Compile("Hello @Model.Name");
-            
+            var razorEngine = new RazorEngine();
+            var initialTemplate = razorEngine.Compile<TestNameModel>("Hello @Model.Name", cancellationToken: TestContext.CancellationToken);
+
             initialTemplate.SaveToFile("testTemplate.dll");
 
-            IRazorEngineCompiledTemplate loadedTemplate = RazorEngineCompiledTemplate.LoadFromFile("testTemplate.dll");
+            var loadedTemplate = RazorEngineCompiledTemplate<TestNameModel>.LoadFromFile("testTemplate.dll");
 
-            string initialTemplateResult = initialTemplate.Run(new { Name = "Alex" });
-            string loadedTemplateResult = loadedTemplate.Run(new { Name = "Alex" });
+            string initialTemplateResult = initialTemplate.Run(new TestNameModel { Name = "Alex" });
+            string loadedTemplateResult = loadedTemplate.Run(new TestNameModel { Name = "Alex" });
             
             Assert.AreEqual(initialTemplateResult, loadedTemplateResult);
         }
@@ -89,15 +89,15 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestSaveToFileAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate initialTemplate = await razorEngine.CompileAsync("Hello @Model.Name");
+            var razorEngine = new RazorEngine();
+            var initialTemplate = await razorEngine.CompileAsync<TestNameModel>("Hello @Model.Name", cancellationToken: TestContext.CancellationToken);
             
             await initialTemplate.SaveToFileAsync("testTemplate.dll");
 
-            IRazorEngineCompiledTemplate loadedTemplate = await RazorEngineCompiledTemplate.LoadFromFileAsync("testTemplate.dll");
+            var loadedTemplate = await RazorEngineCompiledTemplate<TestNameModel>.LoadFromFileAsync("testTemplate.dll");
 
-            string initialTemplateResult = await initialTemplate.RunAsync(new { Name = "Alex" });
-            string loadedTemplateResult = await loadedTemplate.RunAsync(new { Name = "Alex" });
+            string initialTemplateResult = await initialTemplate.RunAsync(new TestNameModel { Name = "Alex" });
+            string loadedTemplateResult = await loadedTemplate.RunAsync(new TestNameModel { Name = "Alex" });
             
             Assert.AreEqual(initialTemplateResult, loadedTemplateResult);
         }
@@ -105,19 +105,19 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestSave_RazorEngineCompiledTemplateMeta_1()
         {
-            RazorEngineCompiledTemplateMeta meta1 = new RazorEngineCompiledTemplateMeta()
+            var meta1 = new RazorEngineCompiledTemplateMeta()
             {
-                AssemblyByteCode = new byte[] { 1, 2, 3 },
+                AssemblyByteCode = [1, 2, 3],
                 TemplateFileName = "name1",
                 TemplateNamespace = "namespace1"
             };
 
-            MemoryStream memoryStream = new MemoryStream();
+            await using var memoryStream = new MemoryStream();
 
             await meta1.Write(memoryStream);
             memoryStream.Position = 0;
 
-            RazorEngineCompiledTemplateMeta meta2 = await RazorEngineCompiledTemplateMeta.Read(memoryStream);
+            var meta2 = await RazorEngineCompiledTemplateMeta.Read(memoryStream);
 
             CollectionAssert.AreEqual(meta1.AssemblyByteCode, meta2.AssemblyByteCode);
             CollectionAssert.AreEqual(meta1.PdbByteCode, meta2.PdbByteCode);
@@ -130,10 +130,10 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestSave_RazorEngineCompiledTemplateMeta_2()
         {
-            RazorEngineCompiledTemplateMeta meta1 = new RazorEngineCompiledTemplateMeta()
+            var meta1 = new RazorEngineCompiledTemplateMeta()
             {
-                AssemblyByteCode = new byte[] { 1, 2, 3 },
-                PdbByteCode = new byte[] { 1, 2, 3 },
+                AssemblyByteCode = [1, 2, 3],
+                PdbByteCode = [1, 2, 3],
                 TemplateFileName = "111",
                 TemplateNamespace = "222",
                 GeneratedSourceCode = "33333",
@@ -141,13 +141,12 @@ namespace RazorEngineCore.Tests
 
             };
 
-            MemoryStream memoryStream = new MemoryStream();
+            await using var memoryStream = new MemoryStream();
 
             await meta1.Write(memoryStream);
             memoryStream.Position = 0;
 
-            RazorEngineCompiledTemplateMeta meta2 = await RazorEngineCompiledTemplateMeta.Read(memoryStream);
-
+            var meta2 = await RazorEngineCompiledTemplateMeta.Read(memoryStream);
 
             CollectionAssert.AreEqual(meta1.AssemblyByteCode, meta2.AssemblyByteCode);
             CollectionAssert.AreEqual(meta1.PdbByteCode, meta2.PdbByteCode);
@@ -156,5 +155,7 @@ namespace RazorEngineCore.Tests
             Assert.AreEqual(meta1.GeneratedSourceCode, meta2.GeneratedSourceCode);
             Assert.AreEqual(meta1.TemplateSource, meta2.TemplateSource);
         }
+
+        public TestContext TestContext { get; set; }
     }
 }

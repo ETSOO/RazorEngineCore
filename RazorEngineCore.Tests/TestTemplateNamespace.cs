@@ -12,12 +12,12 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestSettingTemplateNamespace()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
-            IRazorEngineCompiledTemplate initialTemplate = razorEngine.Compile("@{ var message = \"OK\"; }@message",
-                builder => { builder.Options.TemplateNamespace = "Test.Namespace"; });
+            var initialTemplate = razorEngine.Compile<object?>("@{ var message = \"OK\"; }@message",
+                builder => { builder.Options.TemplateNamespace = "Test.Namespace"; }, TestContext.CancellationToken);
 
-            var result = initialTemplate.Run();
+            var result = initialTemplate.Run(null);
 
             Assert.AreEqual("OK", result);
         }
@@ -25,14 +25,16 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestSettingTemplateNamespaceT()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
-            var initialTemplate = razorEngine.Compile<TestTemplate2>("@{ var message = \"OK\"; }@message",
-                builder => { builder.Options.TemplateNamespace = "Test.Namespace"; });
+            var initialTemplate = razorEngine.Compile<TestTemplate2, TestModel>("@{ var message = \"OK\"; }@message",
+                builder => { builder.Options.TemplateNamespace = "Test.Namespace"; }, TestContext.CancellationToken);
 
             var result = initialTemplate.Run(a => { });
 
             Assert.AreEqual("OK", result);
         }
+
+        public TestContext TestContext { get; set; }
     }
 }

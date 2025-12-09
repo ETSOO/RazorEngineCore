@@ -11,9 +11,9 @@ namespace RazorEngineCore
     {
         public RazorEngineCompilationOptions Options { get; set; }
 
-        public RazorEngineCompilationOptionsBuilder(RazorEngineCompilationOptions options = null)
+        public RazorEngineCompilationOptionsBuilder(RazorEngineCompilationOptions? options = null)
         {
-            this.Options = options ?? new RazorEngineCompilationOptions();
+            Options = options ?? new RazorEngineCompilationOptions();
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace RazorEngineCore
         public void AddAssemblyReferenceByName(string assemblyName)
         {
             Assembly assembly = Assembly.Load(new AssemblyName(assemblyName));
-            this.AddAssemblyReference(assembly);
+            AddAssemblyReference(assembly);
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace RazorEngineCore
         /// <param name="assembly">Assembly to add to the assembly list</param>
         public void AddAssemblyReference(Assembly assembly)
         {
-            this.Options.ReferencedAssemblies.Add(assembly);
+            Options.ReferencedAssemblies.Add(assembly);
         }
 
         /// <summary>
@@ -42,11 +42,11 @@ namespace RazorEngineCore
         /// <param name="type">The type who's assembly should be added to the assembly list</param>
         public void AddAssemblyReference(Type type)
         {
-            this.AddAssemblyReference(type.Assembly);
+            AddAssemblyReference(type.Assembly);
 
             foreach (Type argumentType in type.GenericTypeArguments)
             {
-                this.AddAssemblyReference(argumentType);
+                AddAssemblyReference(argumentType);
             }
         }
 
@@ -56,7 +56,7 @@ namespace RazorEngineCore
         /// <param name="reference">Metadata Reference to add to the Engine's Referenced Assemblies</param>
         public void AddMetadataReference(MetadataReference reference)
         {
-            this.Options.MetadataReferences.Add(reference);
+            Options.MetadataReferences.Add(reference);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace RazorEngineCore
         /// <param name="namespaceName">Namespace to add to default usings</param>
         public void AddUsing(string namespaceName)
         {
-            this.Options.DefaultUsings.Add(namespaceName);
+            Options.DefaultUsings.Add(namespaceName);
         }
 
         /// <summary>
@@ -81,25 +81,25 @@ namespace RazorEngineCore
         /// <param name="type">Type to <c>@inherits</c> from</param>
         public void Inherits(Type type)
         {
-            this.Options.Inherits = this.RenderTypeName(type);
-            this.AddAssemblyReference(type);
+            Options.Inherits = RenderTypeName(type);
+            AddAssemblyReference(type);
         }
 
         private string RenderTypeName(Type type)
         {
-            IList<string> elements = new List<string>()
-            {
+            IList<string?> elements =
+            [
                 type.Namespace,
-                RenderDeclaringType(type.DeclaringType),
+                type.DeclaringType == null ? null : RenderDeclaringType(type.DeclaringType),
                 type.Name
-            };
+            ];
 
-            string result = string.Join(".", elements.Where(e => !string.IsNullOrWhiteSpace(e)));
+            var result = string.Join(".", elements.Where(e => !string.IsNullOrEmpty(e)));
 
-            int tildeLocation = result.IndexOf('`');
+            var tildeLocation = result.IndexOf('`');
             if (tildeLocation > -1)
             {
-                result = result.Substring(0, tildeLocation);
+                result = result[..tildeLocation];
             }
 
             if (type.GenericTypeArguments.Length == 0)
@@ -107,24 +107,22 @@ namespace RazorEngineCore
                 return result;
             }
 
-            return result + "<" + string.Join(",", type.GenericTypeArguments.Select(this.RenderTypeName)) + ">";
+            return result + "<" + string.Join(",", type.GenericTypeArguments.Select(RenderTypeName)) + ">";
         }
 
         private string RenderDeclaringType(Type type)
         {
-            if (type == null)
+            if (type.DeclaringType != null)
             {
-                return null;
+                var parent = RenderDeclaringType(type.DeclaringType);
+
+                if (!string.IsNullOrEmpty(parent))
+                {
+                    return parent + "." + type.Name;
+                }
             }
 
-            string parent = RenderDeclaringType(type.DeclaringType);
-
-            if (string.IsNullOrWhiteSpace(parent))
-            {
-                return type.Name;
-            }
-
-            return parent + "." + type.Name;
+            return type.Name;
         }
 
         /// <summary>
@@ -132,7 +130,7 @@ namespace RazorEngineCore
         /// </summary>
         public void IncludeDebuggingInfo()
         {
-            this.Options.IncludeDebuggingInfo = true;
+            Options.IncludeDebuggingInfo = true;
         }
 
         /// <summary>
@@ -140,7 +138,7 @@ namespace RazorEngineCore
         /// </summary>
         public void ConfigureRazorEngineProject(Action<RazorProjectEngineBuilder> configure)
         {
-            this.Options.ProjectEngineBuilder = configure;
+            Options.ProjectEngineBuilder = configure;
         }
 
     }

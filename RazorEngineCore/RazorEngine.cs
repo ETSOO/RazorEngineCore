@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,60 +7,63 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
 using System.Reflection.Metadata;
 
 namespace RazorEngineCore
 {
     public class RazorEngine : IRazorEngine
     {
-        public IRazorEngineCompiledTemplate<T> Compile<T>(string content, Action<IRazorEngineCompilationOptionsBuilder> builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate
+        public IRazorEngineCompiledTemplate<T, M> Compile<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate<M>
         {
-            IRazorEngineCompilationOptionsBuilder compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
+            var compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
             compilationOptionsBuilder.AddAssemblyReference(typeof(T).Assembly);
             compilationOptionsBuilder.Inherits(typeof(T));
 
             builderAction?.Invoke(compilationOptionsBuilder);
 
-            RazorEngineCompiledTemplateMeta meta = this.CreateAndCompileToStream(content, compilationOptionsBuilder.Options, cancellationToken);
+            var meta = CreateAndCompileToStream<M>(content, compilationOptionsBuilder, cancellationToken);
 
-            return new RazorEngineCompiledTemplate<T>(meta);
+            return new RazorEngineCompiledTemplate<T, M>(meta);
         }
 
-        public Task<IRazorEngineCompiledTemplate<T>> CompileAsync<T>(string content, Action<IRazorEngineCompilationOptionsBuilder> builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate
+        public Task<IRazorEngineCompiledTemplate<T, M>> CompileAsync<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate<M>
         {
-            return Task.Run(() => this.Compile<T>(content: content, builderAction: builderAction, cancellationToken: cancellationToken));
+            return Task.Run(() => Compile<T, M>(content: content, builderAction: builderAction, cancellationToken: cancellationToken));
         }
 
-        public IRazorEngineCompiledTemplate Compile(string content, Action<IRazorEngineCompilationOptionsBuilder> builderAction = null, CancellationToken cancellationToken = default)
+        public IRazorEngineCompiledTemplate<M> Compile<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
         {
-            IRazorEngineCompilationOptionsBuilder compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
-            compilationOptionsBuilder.Inherits(typeof(RazorEngineTemplateBase));
+            var compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
+            compilationOptionsBuilder.Inherits(typeof(RazorEngineTemplateBase<M>));
 
             builderAction?.Invoke(compilationOptionsBuilder);
  
-            RazorEngineCompiledTemplateMeta meta = this.CreateAndCompileToStream(content, compilationOptionsBuilder.Options, cancellationToken);
-            return new RazorEngineCompiledTemplate(meta);
+            var meta = CreateAndCompileToStream<M>(content, compilationOptionsBuilder, cancellationToken);
+            return new RazorEngineCompiledTemplate<M>(meta);
         }
 
-        public Task<IRazorEngineCompiledTemplate> CompileAsync(string content, Action<IRazorEngineCompilationOptionsBuilder> builderAction = null, CancellationToken cancellationToken = default)
+        public Task<IRazorEngineCompiledTemplate<M>> CompileAsync<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() => this.Compile(
+            return Task.Run(() => Compile<M>(
                 content, 
                 builderAction, 
                 cancellationToken));
         }
 
-        protected virtual RazorEngineCompiledTemplateMeta CreateAndCompileToStream(string templateSource, RazorEngineCompilationOptions options, CancellationToken cancellationToken)
+        protected virtual RazorEngineCompiledTemplateMeta CreateAndCompileToStream<M>(string templateSource, RazorEngineCompilationOptionsBuilder builder, CancellationToken cancellationToken)
         {
-            templateSource = this.WriteDirectives(templateSource, options);
+            builder.AddAssemblyReference(typeof(RazorEngineTemplateBase<M>).Assembly);
 
-            string projectPath = @".";
-            string fileName = string.IsNullOrWhiteSpace(options.TemplateFilename) 
+            var options = builder.Options;
+
+            templateSource = WriteDirectives(templateSource, options);
+
+            var projectPath = @".";
+            var fileName = string.IsNullOrWhiteSpace(options.TemplateFilename) 
                 ? Path.GetRandomFileName() + ".cshtml" 
                 : options.TemplateFilename;
 
-            RazorProjectEngine engine = RazorProjectEngine.Create(
+            var engine = RazorProjectEngine.Create(
                 RazorConfiguration.Default,
                 RazorProjectFileSystem.Create(projectPath),
                 (builder) =>
@@ -70,57 +72,53 @@ namespace RazorEngineCore
                     options.ProjectEngineBuilder?.Invoke(builder);
                 });
 
-            RazorSourceDocument document = RazorSourceDocument.Create(templateSource, fileName);
+            var document = RazorSourceDocument.Create(templateSource, fileName);
 
-            RazorCodeDocument codeDocument = engine.Process(
+            var codeDocument = engine.Process(
                 document,
                 null,
-                new List<RazorSourceDocument>(),
-                new List<TagHelperDescriptor>());
+                [],
+                []);
             
-            RazorCSharpDocument razorCSharpDocument = codeDocument.GetCSharpDocument();
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(razorCSharpDocument.GeneratedCode, cancellationToken: cancellationToken);
+            var razorCSharpDocument = codeDocument.GetCSharpDocument();
+            var syntaxTree = CSharpSyntaxTree.ParseText(razorCSharpDocument.GeneratedCode, cancellationToken: cancellationToken);
 
-            CSharpCompilation compilation = CSharpCompilation.Create(
+            var compilation = CSharpCompilation.Create(
                 fileName,
-                new[]
-                {
+                [
                     syntaxTree
-                },
-                options.ReferencedAssemblies
-                   .Select(ass =>
-                   {
-#if NETSTANDARD2_0
-                            return  MetadataReference.CreateFromFile(ass.Location); 
-#else
-                       unsafe
+                ],
+                [
+                    .. options.ReferencedAssemblies
+                       .Select(ass =>
                        {
-                           ass.TryGetRawMetadata(out byte* blob, out int length);
-                           ModuleMetadata moduleMetadata = ModuleMetadata.CreateFromMetadata((IntPtr)blob, length);
-                           AssemblyMetadata assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
-                           PortableExecutableReference metadataReference = assemblyMetadata.GetReference();
+                           unsafe
+                           {
+                               ass.TryGetRawMetadata(out byte* blob, out int length);
+                               ModuleMetadata moduleMetadata = ModuleMetadata.CreateFromMetadata((IntPtr)blob, length);
+                               AssemblyMetadata assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
+                               PortableExecutableReference metadataReference = assemblyMetadata.GetReference();
 
-                           return metadataReference;
-                       }
-#endif
-                   })
-                    .Concat(options.MetadataReferences)
-                    .ToList(),
+                               return metadataReference;
+                           }
+                       })
+,
+                    .. options.MetadataReferences,
+                ],
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                     .WithOptimizationLevel(OptimizationLevel.Release)
                     .WithOverflowChecks(true));
 
+            var assemblyStream = new MemoryStream();
+            var pdbStream = options.IncludeDebuggingInfo ? new MemoryStream() : null;
 
-            MemoryStream assemblyStream = new MemoryStream();
-            MemoryStream pdbStream = options.IncludeDebuggingInfo ? new MemoryStream() : null;
-
-            EmitResult emitResult = compilation.Emit(assemblyStream, pdbStream, cancellationToken: cancellationToken);
+            var emitResult = compilation.Emit(assemblyStream, pdbStream, cancellationToken: cancellationToken);
 
             if (!emitResult.Success)
             {
-                RazorEngineCompilationException exception = new RazorEngineCompilationException()
+                var exception = new RazorEngineCompilationException()
                 {
-                    Errors = emitResult.Diagnostics.ToList(),
+                    Errors = [.. emitResult.Diagnostics],
                     GeneratedCode = razorCSharpDocument.GeneratedCode
                 };
 
@@ -140,10 +138,12 @@ namespace RazorEngineCore
 
         protected virtual string WriteDirectives(string content, RazorEngineCompilationOptions options)
         {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"@inherits {options.Inherits}");
+            var stringBuilder = new StringBuilder();
 
-            foreach (string entry in options.DefaultUsings)
+            // For dynamic object, replace System.Object with dynamic to pass the build.
+            stringBuilder.AppendLine($"@inherits {options.Inherits.Replace("<System.Object>", "<dynamic>")}");
+
+            foreach (var entry in options.DefaultUsings)
             {
                 stringBuilder.AppendLine($"@using {entry}");
             }

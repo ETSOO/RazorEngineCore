@@ -5,61 +5,66 @@ using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
-    public class RazorEngineCompiledTemplate<T> : RazorEngineCompiledTemplateBase, IRazorEngineCompiledTemplate<T> where T : IRazorEngineTemplate
+    public class RazorEngineCompiledTemplate<T, M> : RazorEngineCompiledTemplateBase, IRazorEngineCompiledTemplate<T, M> where T : IRazorEngineTemplate<M>
     {
-
-        internal RazorEngineCompiledTemplate(RazorEngineCompiledTemplateMeta meta)
+        public RazorEngineCompiledTemplate(RazorEngineCompiledTemplateMeta meta) : base(meta)
         {
-            this.Meta = meta;
-
-            Assembly assembly = Assembly.Load(meta.AssemblyByteCode, meta.PdbByteCode);
-            this.TemplateType = assembly.GetType(meta.TemplateNamespace + ".Template");
         }
 
-        public static RazorEngineCompiledTemplate<T> LoadFromFile(string fileName)
+        public static RazorEngineCompiledTemplate<T, M> LoadFromFile(string fileName)
         {
             return LoadFromFileAsync(fileName).GetAwaiter().GetResult();
         }
         
-        public static async Task<RazorEngineCompiledTemplate<T>> LoadFromFileAsync(string fileName)
+        public static async Task<RazorEngineCompiledTemplate<T, M>> LoadFromFileAsync(string fileName)
         {
-#if NETSTANDARD2_0
-            using (FileStream fileStream = new FileStream(
-#else
-            await using (FileStream fileStream = new FileStream(
-#endif
+            await using var fileStream = new FileStream(
                              path: fileName,
                              mode: FileMode.Open,
                              access: FileAccess.Read,
                              share: FileShare.None,
                              bufferSize: 4096,
-                             useAsync: true))
-            {
-                return await LoadFromStreamAsync(fileStream);
-            }
+                             useAsync: true);
+
+            return await LoadFromStreamAsync(fileStream);
         }
 
-        public static IRazorEngineCompiledTemplate<T> LoadFromStream(Stream stream)
+        public static IRazorEngineCompiledTemplate<T, M> LoadFromStream(Stream stream)
         {
             return LoadFromStreamAsync(stream).GetAwaiter().GetResult();
         }
         
-        public static async Task<RazorEngineCompiledTemplate<T>> LoadFromStreamAsync(Stream stream)
+        public static async Task<RazorEngineCompiledTemplate<T, M>> LoadFromStreamAsync(Stream stream)
         {
-            return new RazorEngineCompiledTemplate<T>(await RazorEngineCompiledTemplateMeta.Read(stream));
+            return new RazorEngineCompiledTemplate<T, M>(await RazorEngineCompiledTemplateMeta.Read(stream));
+        }
+
+        public string Run(M model)
+        {
+            return Run((obj) => obj.Model = model);
         }
 
         public string Run(Action<T> initializer)
         {
-            return this.RunAsync(initializer).GetAwaiter().GetResult();
+            return RunAsync(initializer).GetAwaiter().GetResult();
         }
-        
+
+        public Task<string> RunAsync(M model)
+        {
+            return RunAsync((obj) => obj.Model = model);
+        }
+
         public async Task<string> RunAsync(Action<T> initializer)
         {
-            var instance = (T) Activator.CreateInstance(this.TemplateType);
+            var instance = (T)(Activator.CreateInstance(TemplateType) ?? throw new Exception("Failed to create template instance"));
             initializer(instance);
 
-            if (this.IsDebuggerEnabled && instance is RazorEngineTemplateBase instance2)
+            if (instance.Model != null && typeof(M) == ObjectExtenders.ObjectType)
+            {
+                instance.Model = (dynamic)(new AnonymousTypeWrapper(instance.Model));
+            }
+
+            if (IsDebuggerEnabled && instance is T instance2)
             {
                 instance2.Breakpoint = System.Diagnostics.Debugger.Break;
             }

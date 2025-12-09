@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace RazorEngineCore.Tests
 {
@@ -11,20 +9,22 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestSettingTemplateFilename()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
             var errorThrown = false;
             try
             {
-                IRazorEngineCompiledTemplate initialTemplate = razorEngine.Compile("@{ this is a syntaxerror }", 
-                    builder => { builder.Options.TemplateFilename = "templatefilenameset.txt"; });
+                var initialTemplate = razorEngine.Compile<object>("@{ this is a syntaxerror }", 
+                    builder => { builder.Options.TemplateFilename = "templatefilenameset.txt"; }, TestContext.CancellationToken);
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e.Message.Contains("templatefilenameset.txt"));
+                Assert.Contains("templatefilenameset.txt", e.Message);
                 errorThrown = true;
             }
 
             Assert.IsTrue(errorThrown);
         }
+
+        public TestContext TestContext { get; set; }
     }
 }

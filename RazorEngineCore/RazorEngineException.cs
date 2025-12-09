@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace RazorEngineCore
 {
     public class RazorEngineException : Exception
     {
         public RazorEngineException()
-        {
-        }
-
-        protected RazorEngineException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
 

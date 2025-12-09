@@ -1,17 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RazorEngineCore.Tests.Models;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace RazorEngineCore.Tests
 {
+    using System.Dynamic;
     using System.Runtime.InteropServices;
     using System.Threading;
 
@@ -21,27 +21,26 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompile()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            razorEngine.Compile("Hello @Model.Name");
+            var razorEngine = new RazorEngine();
+            razorEngine.Compile<TestNameModel>("Hello @Model.Name", cancellationToken: TestContext.CancellationToken);
         }
 
         [TestMethod]
         public Task TestCompileAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            return razorEngine.CompileAsync("Hello @Model.Name");
+            var razorEngine = new RazorEngine();
+            return razorEngine.CompileAsync<TestNameModel>("Hello @Model.Name", cancellationToken: TestContext.CancellationToken);
         }
 
         [TestMethod]
         public void TestCompileAndRun_HtmlLiteral()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile("<h1>Hello @Model.Name</h1>");
+            var data = new TestNameModel { Name = "Alex" };
 
-            string actual = template.Run(new
-            {
-                Name = "Alex"
-            });
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestNameModel>("<h1>Hello @Model.Name</h1>", cancellationToken: TestContext.CancellationToken);
+
+            var actual = template.Run(data);
 
             Assert.AreEqual("<h1>Hello Alex</h1>", actual);
         }
@@ -49,10 +48,10 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestCompileAndRun_HtmlLiteralAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = await razorEngine.CompileAsync("<h1>Hello @Model.Name</h1>");
+            var razorEngine = new RazorEngine();
+            var template = await razorEngine.CompileAsync<TestNameModel>("<h1>Hello @Model.Name</h1>", cancellationToken: TestContext.CancellationToken);
 
-            string actual = await template.RunAsync(new
+            var actual = await template.RunAsync(new TestNameModel
             {
                 Name = "Alex"
             });
@@ -63,10 +62,10 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_InAttributeVariables()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile("<div class=\"circle\" style=\"background-color: hsla(@Model.Colour, 70%,   80%,1);\">");
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<dynamic>("<div class=\"circle\" style=\"background-color: hsla(@Model.Colour, 70%,   80%,1);\">", cancellationToken: TestContext.CancellationToken);
 
-            string actual = template.Run(new
+            var actual = template.Run(new
             {
                 Colour = 88
             });
@@ -77,8 +76,8 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_InAttributeVariables2()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile("<img src='@(\"test\")'>");
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<dynamic>("<img src='@(\"test\")'>", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(new
             {
@@ -91,8 +90,8 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestCompileAndRun_InAttributeVariablesAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = await razorEngine.CompileAsync("<div class=\"circle\" style=\"background-color: hsla(@Model.Colour, 70%,   80%,1);\">");
+            var razorEngine = new RazorEngine();
+            var template = await razorEngine.CompileAsync<dynamic>("<div class=\"circle\" style=\"background-color: hsla(@Model.Colour, 70%,   80%,1);\">", cancellationToken: TestContext.CancellationToken);
 
             string actual = await template.RunAsync(new
             {
@@ -105,10 +104,10 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_HtmlAttribute()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile("<div title=\"@Model.Name\">Hello</div>");
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestNameModel>("<div title=\"@Model.Name\">Hello</div>", cancellationToken: TestContext.CancellationToken);
 
-            string actual = template.Run(new
+            string actual = template.Run(new TestNameModel
             {
                 Name = "Alex"
             });
@@ -119,10 +118,10 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestCompileAndRun_HtmlAttributeAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = await razorEngine.CompileAsync("<div title=\"@Model.Name\">Hello</div>");
+            var razorEngine = new RazorEngine();
+            var template = await razorEngine.CompileAsync<TestNameModel>("<div title=\"@Model.Name\">Hello</div>", cancellationToken: TestContext.CancellationToken);
 
-            string actual = await template.RunAsync(new
+            string actual = await template.RunAsync(new TestNameModel
             {
                 Name = "Alex"
             });
@@ -133,10 +132,10 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_DynamicModel_Plain()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile("Hello @Model.Name");
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestNameModel>("Hello @Model.Name", cancellationToken: TestContext.CancellationToken);
 
-            string actual = template.Run(new
+            string actual = template.Run(new TestNameModel
             {
                 Name = "Alex"
             });
@@ -147,10 +146,10 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestCompileAndRun_DynamicModel_PlainAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = await razorEngine.CompileAsync("Hello @Model.Name");
+            var razorEngine = new RazorEngine();
+            var template = await razorEngine.CompileAsync<TestNameModel>("Hello @Model.Name", cancellationToken: TestContext.CancellationToken);
 
-            string actual = await template.RunAsync(new
+            string actual = await template.RunAsync(new TestNameModel
             {
                 Name = "Alex"
             });
@@ -171,7 +170,7 @@ namespace RazorEngineCore.Tests
             {
                 Items = new[] { new Item { Name = "Bob" }, new Item { Name = "Alice" } }
             };
-            var temp = eng.Compile("@foreach(var item in Model.Items) { @item.Name }");
+            var temp = eng.Compile<dynamic>("@foreach(var item in Model.Items) { @item.Name }", cancellationToken: TestContext.CancellationToken);
             var result = temp.Run(model);
             Assert.AreEqual("BobAlice", result);
         }
@@ -179,7 +178,7 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_DynamicModel_Nested()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
             var model = new
             {
@@ -190,7 +189,7 @@ namespace RazorEngineCore.Tests
                 }
             };
 
-            var template = razorEngine.Compile("Name: @Model.Name, Membership: @Model.Membership.Level");
+            var template = razorEngine.Compile<dynamic>("Name: @Model.Name, Membership: @Model.Membership.Level", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(model);
 
@@ -200,7 +199,7 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestCompileAndRun_DynamicModel_NestedAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
             var model = new
             {
@@ -211,7 +210,7 @@ namespace RazorEngineCore.Tests
                 }
             };
 
-            var template = await razorEngine.CompileAsync("Name: @Model.Name, Membership: @Model.Membership.Level");
+            var template = await razorEngine.CompileAsync<dynamic>("Name: @Model.Name, Membership: @Model.Membership.Level", cancellationToken: TestContext.CancellationToken);
 
             string actual = await template.RunAsync(model);
 
@@ -221,9 +220,9 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_NullModel()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
-            var template = razorEngine.Compile("Name: @Model");
+            var template = razorEngine.Compile<object?>("Name: @Model", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(null);
 
@@ -233,11 +232,11 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_NullablePropertyWithValue()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
             DateTime? dateTime = DateTime.Now;
 
-            IRazorEngineCompiledTemplate<TestTemplate2> template = razorEngine.Compile<TestTemplate2>("DateTime: @Model.DateTime.Value.ToString()");
+            var template = razorEngine.Compile<TestTemplate2, TestModel>("DateTime: @Model.DateTime.Value.ToString()", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(instance => instance.Model = new TestModel()
             {
@@ -250,11 +249,11 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_NullablePropertyWithoutValue()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
             DateTime? dateTime = null;
 
-            IRazorEngineCompiledTemplate<TestTemplate2> template = razorEngine.Compile<TestTemplate2>("DateTime: @Model.DateTime");
+            var template = razorEngine.Compile<TestTemplate2, TestModel>("DateTime: @Model.DateTime", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(instance => instance.Model = new TestModel()
             {
@@ -267,9 +266,9 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestCompileAndRun_NullModelAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
-            var template = await razorEngine.CompileAsync("Name: @Model");
+            var template = await razorEngine.CompileAsync<object?>("Name: @Model", cancellationToken: TestContext.CancellationToken);
 
             string actual = await template.RunAsync(null);
 
@@ -279,13 +278,13 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_NullNestedObject()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
-            var template = razorEngine.Compile("Name: @Model.user");
+            var template = razorEngine.Compile<dynamic>("Name: @Model.user", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(new
             {
-                user = (object)null
+                user = (object?)null
             });
 
             Assert.AreEqual("Name: ", actual);
@@ -294,13 +293,13 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestCompileAndRun_NullNestedObjectAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
-            var template = await razorEngine.CompileAsync("Name: @Model.user");
+            var template = await razorEngine.CompileAsync<dynamic>("Name: @Model.user", cancellationToken: TestContext.CancellationToken);
 
             string actual = await template.RunAsync(new
             {
-                user = (object)null
+                user = (object?)null
             });
 
             Assert.AreEqual("Name: ", actual);
@@ -309,7 +308,7 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_DynamicModel_Lists()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
             var model = new
             {
@@ -326,12 +325,12 @@ namespace RazorEngineCore.Tests
                 }
             };
 
-            var template = razorEngine.Compile(@"
+            var template = razorEngine.Compile<dynamic>(@"
 @foreach (var item in Model.Items)
 {
 <div>@item.Key</div>
 }
-");
+", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(model);
             string expected = @"
@@ -344,7 +343,7 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public async Task TestCompileAndRun_DynamicModel_ListsAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
             var model = new
             {
@@ -361,12 +360,12 @@ namespace RazorEngineCore.Tests
                 }
             };
 
-            var template = await razorEngine.CompileAsync(@"
+            var template = await razorEngine.CompileAsync<dynamic>(@"
 @foreach (var item in Model.Items)
 {
 <div>@item.Key</div>
 }
-");
+", cancellationToken: TestContext.CancellationToken);
 
             string actual = await template.RunAsync(model);
             string expected = @"
@@ -380,7 +379,7 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_DynamicModel_Dictionary1()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
             var model = new
             {
@@ -391,14 +390,14 @@ namespace RazorEngineCore.Tests
                 }
             };
 
-            var template = razorEngine.Compile(@"
+            var template = razorEngine.Compile<object>(@"
 @foreach (var key in Model.Dictionary.Keys)
 {
 <div>@key</div>
 }
 <div>@Model.Dictionary[""K1""]</div>
 <div>@Model.Dictionary[""K2""]</div>
-");
+", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(model);
             string expected = @"
@@ -414,7 +413,7 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_DynamicModel_Dictionary2()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
             var model = new
             {
@@ -425,10 +424,10 @@ namespace RazorEngineCore.Tests
                 }
             };
 
-            var template = razorEngine.Compile(@"
+            var template = razorEngine.Compile<dynamic>(@"
 <div>@Model.Dictionary[""K1""].x</div>
 <div>@Model.Dictionary[""K2""].x</div>
-");
+", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(model);
             string expected = @"
@@ -441,9 +440,9 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestCompileAndRun_TestFunction()
         {
-            RazorEngine razorEngine = new RazorEngine();
+            var razorEngine = new RazorEngine();
 
-            var template = razorEngine.Compile(@"
+            var template = razorEngine.Compile<object?>(@"
 @<area>
     @{ RecursionTest(3); }
 </area>
@@ -461,9 +460,9 @@ void RecursionTest(int level)
 	@{ RecursionTest(level - 1); }
 }
 
-}");
+}", cancellationToken: TestContext.CancellationToken);
 
-            string actual = template.Run();
+            string actual = template.Run(null);
             string expected = @"
 <area>
     <div>LEVEL: 3</div>
@@ -477,8 +476,8 @@ void RecursionTest(int level)
         [TestMethod]
         public void TestCompileAndRun_TypedModel1()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<TestTemplate1> template = razorEngine.Compile<TestTemplate1>("Hello @A @B @(A + B) @C @Decorator(\"777\")");
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestTemplate1, object>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(instance =>
             {
@@ -493,8 +492,8 @@ void RecursionTest(int level)
         [TestMethod]
         public async Task TestCompileAndRun_TypedModel1Async()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<TestTemplate1> template = await razorEngine.CompileAsync<TestTemplate1>("Hello @A @B @(A + B) @C @Decorator(\"777\")");
+            var razorEngine = new RazorEngine();
+            var template = await razorEngine.CompileAsync<TestTemplate1, object>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: TestContext.CancellationToken);
 
             string actual = await template.RunAsync(instance =>
             {
@@ -509,8 +508,8 @@ void RecursionTest(int level)
         [TestMethod]
         public void TestCompileAndRun_TypedModel2()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<TestTemplate2> template = razorEngine.Compile<TestTemplate2>("Hello @Model.Decorator(Model.C)");
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestTemplate2, TestModel>("Hello @Model.Decorator(Model.C)", cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(instance =>
             {
@@ -531,8 +530,8 @@ void RecursionTest(int level)
 Hello @Model.Decorator(Model.C)
 ";
 
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>> template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>>(templateText);
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>, TestModel>(templateText, cancellationToken: TestContext.CancellationToken);
 
             string actual = template.Run(instance =>
             {
@@ -548,8 +547,8 @@ Hello @Model.Decorator(Model.C)
         [TestMethod]
         public async Task TestCompileAndRun_TypedModel2Async()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<TestTemplate2> template = await razorEngine.CompileAsync<TestTemplate2>("Hello @Model.Decorator(Model.C)");
+            var razorEngine = new RazorEngine();
+            var template = await razorEngine.CompileAsync<TestTemplate2, TestModel>("Hello @Model.Decorator(Model.C)", cancellationToken: TestContext.CancellationToken);
 
             string actual = await template.RunAsync(instance =>
             {
@@ -565,14 +564,14 @@ Hello @Model.Decorator(Model.C)
         [TestMethod]
         public void TestCompileAndRun_AnonymousModelWithArrayOfObjects()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<TestTemplate2> template = razorEngine.Compile<TestTemplate2>(
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestTemplate2, TestModel>(
 @"
 @foreach (var item in Model.Numbers.OrderByDescending(x => x))
 {
     <p>@item</p>
 }
-");
+", cancellationToken: TestContext.CancellationToken);
             string expected = @"
     <p>3</p>
     <p>2</p>
@@ -582,7 +581,7 @@ Hello @Model.Decorator(Model.C)
             {
                 instance.Initialize(new TestModel
                 {
-                    Numbers = new[] { 2, 1, 3 }
+                    Numbers = [2, 1, 3]
                 });
             });
 
@@ -593,14 +592,14 @@ Hello @Model.Decorator(Model.C)
         [TestMethod]
         public void TestCompileAndRun_StronglyTypedModelLinq()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<TestTemplate2> template = razorEngine.Compile<TestTemplate2>(
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestTemplate2, TestModel>(
 @"
 @foreach (var item in Model.Numbers.OrderByDescending(x => x))
 {
     <p>@item</p>
 }
-");
+", cancellationToken: TestContext.CancellationToken);
             string expected = @"
     <p>3</p>
     <p>2</p>
@@ -610,7 +609,7 @@ Hello @Model.Decorator(Model.C)
             {
                 instance.Initialize(new TestModel
                 {
-                    Numbers = new[] { 2, 1, 3 }
+                    Numbers = [2, 1, 3]
                 });
             });
 
@@ -620,22 +619,22 @@ Hello @Model.Decorator(Model.C)
         [TestMethod]
         public void TestCompileAndRun_DynamicModelLinq()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile(
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestModel>(
 @"
-@foreach (var item in ((IEnumerable<object>)Model.Numbers).OrderByDescending(x => x))
+@foreach (var item in Model.Objects.OrderByDescending(x => x))
 {
     <p>@item</p>
 }
-");
+", cancellationToken: TestContext.CancellationToken);
             string expected = @"
     <p>3</p>
     <p>2</p>
     <p>1</p>
 ";
-            string actual = template.Run(new
+            string actual = template.Run(new TestModel
             {
-                Numbers = new List<object>() { 2, 1, 3 }
+                Objects = [2, 1, 3]
             });
 
             Assert.AreEqual(expected, actual);
@@ -644,14 +643,14 @@ Hello @Model.Decorator(Model.C)
         [TestMethod]
         public async Task TestCompileAndRun_LinqAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<TestTemplate2> template = await razorEngine.CompileAsync<TestTemplate2>(
+            var razorEngine = new RazorEngine();
+            var template = await razorEngine.CompileAsync<TestTemplate2, TestModel>(
 @"
 @foreach (var item in Model.Numbers.OrderByDescending(x => x))
 {
     <p>@item</p>
 }
-");
+", cancellationToken: TestContext.CancellationToken);
             string expected = @"
     <p>3</p>
     <p>2</p>
@@ -661,7 +660,7 @@ Hello @Model.Decorator(Model.C)
             {
                 instance.Initialize(new TestModel
                 {
-                    Numbers = new[] { 2, 1, 3 }
+                    Numbers = [2, 1, 3]
                 });
             });
 
@@ -687,16 +686,15 @@ namespace TestAssembly
             // the various AddAssemblyReference options
             CSharpCompilation compilation = CSharpCompilation.Create(
                     "TestAssembly",
-                    new[]
-                    {
-                            CSharpSyntaxTree.ParseText(greetingClass)
-                    },
+                    [
+                            CSharpSyntaxTree.ParseText(greetingClass, cancellationToken: TestContext.CancellationToken)
+                    ],
                     GetMetadataReferences(),
                     new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
 
-            MemoryStream memoryStream = new MemoryStream();
-            EmitResult emitResult = compilation.Emit(memoryStream);
+            var memoryStream = new MemoryStream();
+            EmitResult emitResult = compilation.Emit(memoryStream, cancellationToken: TestContext.CancellationToken);
 
             if (!emitResult.Success)
             {
@@ -711,20 +709,20 @@ namespace TestAssembly
                             ? Assembly.Load(memoryStream.ToArray())
                             : null;
 
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = await razorEngine.CompileAsync(@"
+            var razorEngine = new RazorEngine();
+            var template = await razorEngine.CompileAsync<TestNameModel>(@"
 @using TestAssembly
 <p>@Greeting.GetGreeting(""Name"")</p>
 ", builder =>
             {
                 builder.AddMetadataReference(MetadataReference.CreateFromStream(memoryStream));
 
-            });
+            }, TestContext.CancellationToken);
 
             string expected = @"
 <p>Hello, Name!</p>
 ";
-            string actual = await template.RunAsync();
+            string actual = await template.RunAsync(new TestNameModel { Name = "Name" });
 
             Assert.AreEqual(expected, actual);
         }
@@ -732,61 +730,57 @@ namespace TestAssembly
         [TestMethod]
         public void TestCompileCancellation_DynamicModel()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            using (CancellationTokenSource cancellationSource = new CancellationTokenSource())
-            {
-                cancellationSource.Cancel();
+            var razorEngine = new RazorEngine();
 
-                Assert.ThrowsException<OperationCanceledException>(() =>
-                {
-                    _ = razorEngine.Compile("Hello @Model.Name", cancellationToken: cancellationSource.Token);
-                });
-            }
+            using CancellationTokenSource cancellationSource = new CancellationTokenSource();
+            cancellationSource.Cancel();
+
+            Assert.Throws<OperationCanceledException>(() =>
+            {
+                _ = razorEngine.Compile<TestNameModel>("Hello @Model.Name", cancellationToken: cancellationSource.Token);
+            });
         }
 
         [TestMethod]
         public async Task TestCompileCancellation_DynamicModelAsync()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            using (CancellationTokenSource cancellationSource = new CancellationTokenSource())
-            {
-                cancellationSource.Cancel();
+            var razorEngine = new RazorEngine();
 
-                await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () =>
-                {
-                    _ = await razorEngine.CompileAsync("Hello @Model.Name", cancellationToken: cancellationSource.Token);
-                });
-            }
+            using var cancellationSource = new CancellationTokenSource();
+            cancellationSource.Cancel();
+
+            await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                _ = await razorEngine.CompileAsync<TestNameModel>("Hello @Model.Name", cancellationToken: cancellationSource.Token);
+            });
         }
 
         [TestMethod]
         public void TestCompileCancellation_TypedModel1()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            using (CancellationTokenSource cancellationSource = new CancellationTokenSource())
-            {
-                cancellationSource.Cancel();
+            var razorEngine = new RazorEngine();
 
-                Assert.ThrowsException<OperationCanceledException>(() =>
-                {
-                    _ = razorEngine.Compile<TestTemplate1>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: cancellationSource.Token);
-                });
-            }
+            using var cancellationSource = new CancellationTokenSource();
+            cancellationSource.Cancel();
+
+            Assert.Throws<OperationCanceledException>(() =>
+            {
+                _ = razorEngine.Compile<TestTemplate1>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: cancellationSource.Token);
+            });
         }
 
         [TestMethod]
         public async Task TestCompileCancellation_TypedModel1Async()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            using (CancellationTokenSource cancellationSource = new CancellationTokenSource())
-            {
-                cancellationSource.Cancel();
+            var razorEngine = new RazorEngine();
 
-                await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () =>
-                {
-                    _ = await razorEngine.CompileAsync<TestTemplate1>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: cancellationSource.Token);
-                });
-            }
+            using var cancellationSource = new CancellationTokenSource();
+            cancellationSource.Cancel();
+
+            await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+            {
+                _ = await razorEngine.CompileAsync<TestTemplate1>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: cancellationSource.Token);
+            });
         }
 
         private static List<MetadataReference> GetMetadataReferences()
@@ -795,24 +789,24 @@ namespace TestAssembly
                 ".NET Framework",
                 StringComparison.OrdinalIgnoreCase))
             {
-                return new List<MetadataReference>()
-                           {
-                               MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                               MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")).Location),
-                               MetadataReference.CreateFromFile(Assembly.Load(
-                                   new AssemblyName(
-                                       "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")).Location),
-                               MetadataReference.CreateFromFile(typeof(System.Runtime.GCSettings).Assembly.Location)
-                           };
+                return
+                    [
+                        MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                        MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("Microsoft.CSharp, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")).Location),
+                        MetadataReference.CreateFromFile(Assembly.Load(
+                            new AssemblyName(
+                                "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")).Location),
+                        MetadataReference.CreateFromFile(typeof(System.Runtime.GCSettings).Assembly.Location)
+                    ];
             }
 
-            return new List<MetadataReference>()
-                       {
-                           MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                           MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("Microsoft.CSharp")).Location),
-                           MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location),
-                           MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location)
-                       };
+            return
+                [
+                    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("Microsoft.CSharp")).Location),
+                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location),
+                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location)
+                ];
         }
 
 
@@ -825,11 +819,11 @@ namespace TestAssembly
 Hello @Model.Decorator(Model.C)
 ";
 
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>> template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>>(templateText, builder =>
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>, TestModel>(templateText, builder =>
             {
                 builder.IncludeDebuggingInfo();
-            });
+            }, TestContext.CancellationToken);
 
             string actual = template.Run(instance =>
             {
@@ -845,22 +839,19 @@ Hello @Model.Decorator(Model.C)
         [TestMethod]
         public void TestCompileAndRun_IncludeDebuggingForTypedAnonymous_DisabledDebugging()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile("<h1>Hello @Model.Name</h1>", builder =>
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestNameModel>("<h1>Hello @Model.Name</h1>", builder =>
             {
                 builder.IncludeDebuggingInfo();
-            });
+            }, TestContext.CancellationToken);
 
-            string actual = template.Run(new
+            string actual = template.Run(new TestNameModel
             {
                 Name = "Alex"
             });
 
             Assert.AreEqual("<h1>Hello Alex</h1>", actual);
         }
-
-
-
 
         [TestMethod]
         public void TestCompileAndRun_IncludeDebuggingForTypedMode_EnabledDebugging()
@@ -870,11 +861,11 @@ Hello @Model.Decorator(Model.C)
 Hello @Model.Decorator(Model.C)
 ";
 
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>> template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>>(templateText, builder =>
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>, TestModel>(templateText, builder =>
             {
                 builder.IncludeDebuggingInfo();
-            });
+            }, TestContext.CancellationToken);
 
             template.EnableDebugging();
 
@@ -892,15 +883,15 @@ Hello @Model.Decorator(Model.C)
         [TestMethod]
         public void TestCompileAndRun_IncludeDebuggingForTypedAnonymous_EnabledDebugging()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile("<h1>Hello @Model.Name</h1>", builder =>
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestNameModel>("<h1>Hello @Model.Name</h1>", builder =>
             {
                 builder.IncludeDebuggingInfo();
-            });
+            }, TestContext.CancellationToken);
 
             template.EnableDebugging();
 
-            string actual = template.Run(new
+            string actual = template.Run(new TestNameModel
             {
                 Name = "Alex"
             });
@@ -912,19 +903,19 @@ Hello @Model.Decorator(Model.C)
         public void TestCompileAndRun_ProjectEngineBuilderAction_IsInvoked()
         {
             var builderActionIsInvoked = false;
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile("<h1>Hello @Model.Name</h1>", builder =>
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestNameModel>("<h1>Hello @Model.Name</h1>", builder =>
             {
                 builder.IncludeDebuggingInfo();
                 builder.ConfigureRazorEngineProject(engineBuilder =>
                 {
                     builderActionIsInvoked = true;
                 });
-            });
+            }, TestContext.CancellationToken);
 
             template.EnableDebugging();
 
-            string actual = template.Run(new
+            string actual = template.Run(new TestNameModel
             {
                 Name = "Alex"
             });
@@ -936,14 +927,13 @@ Hello @Model.Decorator(Model.C)
         public void TestCompileAndRun_Typed_EnabledDebuggingThrowsException()
         {
             string templateText = @"
-@inherits RazorEngineCore.RazorEngineTemplateBase<RazorEngineCore.Tests.Models.TestModel>
 Hello @Model.Decorator(Model.C)
 ";
 
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>> template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>>(templateText);
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestModel>(templateText, cancellationToken: TestContext.CancellationToken);
 
-            Assert.ThrowsException<RazorEngineException>(() =>
+            Assert.Throws<RazorEngineException>(() =>
             {
                 template.EnableDebugging();
             });
@@ -952,14 +942,40 @@ Hello @Model.Decorator(Model.C)
         [TestMethod]
         public void TestCompileAndRun_Anonymous_EnabledDebuggingThrowsException()
         {
-            RazorEngine razorEngine = new RazorEngine();
-            IRazorEngineCompiledTemplate template = razorEngine.Compile("<h1>Hello @Model.Name</h1>");
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestNameModel>("<h1>Hello @Model.Name</h1>", cancellationToken: TestContext.CancellationToken);
 
-            Assert.ThrowsException<RazorEngineException>(() =>
+            Assert.Throws<RazorEngineException>(() =>
             {
                 template.EnableDebugging();
             });
 
         }
+
+        [TestMethod]
+        public async Task HtmlSafeRenderAsync_Test()
+        {
+            // Arrange
+            var template = """
+                <p>@Model.Name, @Html.Raw(Model.Name)</p>
+            """;
+
+            var model = new TestNameModel
+            {
+                Name = "<b>ETSOO</b>"
+            };
+
+            // Act
+            var razorEngine = new RazorEngine();
+
+            var compiledTemplate = await razorEngine.CompileAsync<TestNameModel>(template, cancellationToken: TestContext.CancellationToken);
+
+            var result = (await compiledTemplate.RunAsync(model)).Trim();
+
+            // Assert
+            Assert.AreEqual("<p>&lt;b&gt;ETSOO&lt;/b&gt;, <b>ETSOO</b></p>", result);
+        }
+
+        public TestContext TestContext { get; set; }
     }
 }

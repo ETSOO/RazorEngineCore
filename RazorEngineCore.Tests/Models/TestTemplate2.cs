@@ -4,7 +4,7 @@
     {
         public void Initialize(TestModel model)
         {
-            this.Model = model;
+            Model = model;
         }
     }
 }

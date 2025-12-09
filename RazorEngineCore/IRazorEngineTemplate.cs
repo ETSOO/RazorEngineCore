@@ -1,14 +1,19 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
-    public interface IRazorEngineTemplate
+    public interface IRazorEngineTemplate<M>
     {
+        RazorEngineHtmlSafeTemplateHtml Html { get; }
 
-        dynamic Model { get; set; }
-        void WriteLiteral(string literal = null);
+        M Model { get; set; }
+
+        Action Breakpoint { get; set; }
+
+        void WriteLiteral(string? literal = null);
         
-        void Write(object obj = null);
+        void Write(object? obj = null);
         
         void BeginWriteAttribute(string name, string prefix, int prefixOffset, string suffix, int suffixOffset, int attributeValuesCount);
         

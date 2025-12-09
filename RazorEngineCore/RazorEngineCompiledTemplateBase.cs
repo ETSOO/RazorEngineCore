@@ -1,15 +1,25 @@
-﻿using System.IO;
-using System;
+﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
     public abstract class RazorEngineCompiledTemplateBase
     {
-        protected RazorEngineCompiledTemplateMeta Meta { get; set; }
-        protected Type TemplateType { get; set; }
+        protected RazorEngineCompiledTemplateMeta Meta { get; init; }
+
+        protected Type TemplateType { get; init; }
 
         protected bool IsDebuggerEnabled { get; set; }
+
+        internal RazorEngineCompiledTemplateBase(RazorEngineCompiledTemplateMeta meta)
+        {
+            Meta = meta;
+
+            var assembly = Assembly.Load(meta.AssemblyByteCode, meta.PdbByteCode);
+            TemplateType = assembly.GetType(meta.TemplateNamespace + ".Template") ?? throw new Exception("Failed to load template type");
+        }
 
         public void SaveToFile(string fileName)
         {
@@ -18,20 +28,15 @@ namespace RazorEngineCore
 
         public async Task SaveToFileAsync(string fileName)
         {
-#if NETSTANDARD2_0
-            using (FileStream fileStream = new FileStream(
-#else
-            await using (FileStream fileStream = new FileStream(
-#endif
+            await using var fileStream = new FileStream(
                        path: fileName,
                        mode: FileMode.OpenOrCreate,
                        access: FileAccess.Write,
                        share: FileShare.None,
                        bufferSize: 4096,
-                       useAsync: true))
-            {
-                await this.SaveToStreamAsync(fileStream);
-            }
+                       useAsync: true);
+
+            await this.SaveToStreamAsync(fileStream);
         }
 
         public void SaveToStream(Stream stream)
@@ -44,7 +49,7 @@ namespace RazorEngineCore
             return this.Meta.Write(stream);
         }
 
-        public void EnableDebugging(string debuggingOutputDirectory = null)
+        public void EnableDebugging(string? debuggingOutputDirectory = null)
         {
             if (this.Meta.PdbByteCode == null || this.Meta.PdbByteCode.Length == 0 || string.IsNullOrWhiteSpace(this.Meta.TemplateSource))
             {
@@ -55,6 +60,5 @@ namespace RazorEngineCore
 
             this.IsDebuggerEnabled = true;
         }
-
     }
 }

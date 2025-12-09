@@ -9,12 +9,12 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestModelNestedTypes()
         {
-            IRazorEngine razorEngine = new RazorEngine();
-            string content = "Hello @Model.Name";
+            var razorEngine = new RazorEngine();
+            var content = "Hello @Model.Name";
 
-            IRazorEngineCompiledTemplate<RazorEngineTemplateBase<NestedTestModel.TestModelInnerClass1.TestModelInnerClass2>> template2 = razorEngine.Compile<RazorEngineTemplateBase<NestedTestModel.TestModelInnerClass1.TestModelInnerClass2>>(content);
+            var template2 = razorEngine.Compile<RazorEngineTemplateBase<NestedTestModel.TestModelInnerClass1.TestModelInnerClass2>, NestedTestModel.TestModelInnerClass1.TestModelInnerClass2>(content, cancellationToken: TestContext.CancellationToken);
 
-            string result = template2.Run(instance =>
+            var result = template2.Run(instance =>
             {
                 instance.Model = new NestedTestModel.TestModelInnerClass1.TestModelInnerClass2()
                 {
@@ -28,12 +28,12 @@ namespace RazorEngineCore.Tests
         [TestMethod]
         public void TestModelNoNamespace()
         {
-            IRazorEngine razorEngine = new RazorEngine();
-            string content = "Hello @Model.Name";
+            var razorEngine = new RazorEngine();
+            var content = "Hello @Model.Name";
 
-            IRazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModelWithoutNamespace>> template2 = razorEngine.Compile<RazorEngineTemplateBase<TestModelWithoutNamespace>>(content);
+            var template2 = razorEngine.Compile<RazorEngineTemplateBase<TestModelWithoutNamespace>, TestModelWithoutNamespace>(content, cancellationToken: TestContext.CancellationToken);
 
-            string result = template2.Run(instance =>
+            var result = template2.Run(instance =>
             {
                 instance.Model = new TestModelWithoutNamespace()
                 {
@@ -43,5 +43,7 @@ namespace RazorEngineCore.Tests
 
             Assert.AreEqual("Hello Hello", result);
         }
+
+        public TestContext TestContext { get; set; }
     }
 }
