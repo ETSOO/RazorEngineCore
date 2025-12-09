@@ -7,9 +7,9 @@ namespace RazorEngineCore
 {
     public abstract class RazorEngineCompiledTemplateBase
     {
-        protected RazorEngineCompiledTemplateMeta Meta { get; init; }
+        protected RazorEngineCompiledTemplateMeta Meta { get; }
 
-        protected Type TemplateType { get; init; }
+        protected Type TemplateType { get; }
 
         protected bool IsDebuggerEnabled { get; set; }
 
@@ -17,7 +17,7 @@ namespace RazorEngineCore
         {
             Meta = meta;
 
-            var assembly = Assembly.Load(meta.AssemblyByteCode, meta.PdbByteCode);
+            var assembly = Assembly.Load(meta.AssemblyByteCode ?? [], meta.PdbByteCode);
             TemplateType = assembly.GetType(meta.TemplateNamespace + ".Template") ?? throw new Exception("Failed to load template type");
         }
 
@@ -51,7 +51,7 @@ namespace RazorEngineCore
 
         public void EnableDebugging(string? debuggingOutputDirectory = null)
         {
-            if (Meta.PdbByteCode == null || Meta.PdbByteCode.Length == 0 || string.IsNullOrWhiteSpace(this.Meta.TemplateSource))
+            if (Meta.PdbByteCode == null || Meta.PdbByteCode.Length == 0 || string.IsNullOrWhiteSpace(Meta.TemplateFileName) || string.IsNullOrWhiteSpace(Meta.TemplateSource))
             {
                 throw new RazorEngineException("No debugging info available, compile template with builder.IncludeDebuggingInfo(); option");
             }

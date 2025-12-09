@@ -971,7 +971,9 @@ Hello @Model.Decorator(Model.C)
             // Act
             var razorEngine = new RazorEngine();
 
-            var compiledTemplate = await razorEngine.CompileAsync<TestNameModel>(template, cancellationToken: TestContext.CancellationToken);
+            var compiledTemplate = await razorEngine.CompileAsync<TestNameModel>(template, (builder) => {
+                builder.Options.IncludeDebuggingInfo = true;
+            }, cancellationToken: TestContext.CancellationToken);
 
             var result = (await compiledTemplate.RunAsync(model)).Trim();
 
