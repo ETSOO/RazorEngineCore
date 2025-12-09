@@ -21,7 +21,7 @@ namespace RazorEngineCore
         ///Set to true to generate PDB symbols information along with the assembly for debugging support
         public bool IncludeDebuggingInfo { get; set; } = false;
 
-        public bool TryCache = true;
+        public bool TryCache { get; set; } = true;
 
         public HashSet<string> DefaultUsings { get; set; } =
         [

@@ -87,27 +87,7 @@ namespace RazorEngineCore
 
         private string RenderTypeName(Type type)
         {
-            IList<string?> elements =
-            [
-                type.Namespace,
-                type.DeclaringType == null ? null : RenderDeclaringType(type.DeclaringType),
-                type.Name
-            ];
-
-            var result = string.Join(".", elements.Where(e => !string.IsNullOrEmpty(e)));
-
-            var tildeLocation = result.IndexOf('`');
-            if (tildeLocation > -1)
-            {
-                result = result[..tildeLocation];
-            }
-
-            if (type.GenericTypeArguments.Length == 0)
-            {
-                return result;
-            }
-
-            return result + "<" + string.Join(",", type.GenericTypeArguments.Select(RenderTypeName)) + ">";
+            return type.ToString().Replace("`1[", "<").Replace("]", ">").Replace("+", ".");
         }
 
         private string RenderDeclaringType(Type type)
