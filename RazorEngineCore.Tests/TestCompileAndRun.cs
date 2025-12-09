@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace RazorEngineCore.Tests
 {
-    using System.Dynamic;
     using System.Runtime.InteropServices;
     using System.Threading;
 
@@ -906,6 +905,7 @@ Hello @Model.Decorator(Model.C)
             var razorEngine = new RazorEngine();
             var template = razorEngine.Compile<TestNameModel>("<h1>Hello @Model.Name</h1>", builder =>
             {
+                builder.Options.TryCache = false;
                 builder.IncludeDebuggingInfo();
                 builder.ConfigureRazorEngineProject(engineBuilder =>
                 {
@@ -943,7 +943,10 @@ Hello @Model.Decorator(Model.C)
         public void TestCompileAndRun_Anonymous_EnabledDebuggingThrowsException()
         {
             var razorEngine = new RazorEngine();
-            var template = razorEngine.Compile<TestNameModel>("<h1>Hello @Model.Name</h1>", cancellationToken: TestContext.CancellationToken);
+            var template = razorEngine.Compile<TestNameModel>("<h1>Hello @Model.Name</h1>", (builder) =>
+            {
+                builder.Options.TemplateFilename = nameof(TestCompileAndRun_Anonymous_EnabledDebuggingThrowsException);
+            }, cancellationToken: TestContext.CancellationToken);
 
             Assert.Throws<RazorEngineException>(() =>
             {

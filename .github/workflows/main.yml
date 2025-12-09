@@ -14,6 +14,10 @@ jobs:
           dotnet-version: "10.x"
           include-prerelease: true
 
+      # Test
+      - name: Run tests
+        run: dotnet test RazorEngineCore.Tests/RazorEngineCore.Tests.csproj --configuration Release
+
       # Publish
       - name: Publish RazorEngineCore on version change
         uses: alirezanet/publish-nuget@v3.1.0

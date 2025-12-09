@@ -1,18 +1,46 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Razor.Language;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System.Reflection.Metadata;
 
 namespace RazorEngineCore
 {
     public class RazorEngine : IRazorEngine
     {
+        private static readonly ConcurrentDictionary<string, RazorEngineCompiledTemplateMeta> templateCache = new();
+
+        private static string? CreateCacheKey(string content, RazorEngineCompilationOptions options, Type modelType, Type? templateType = null)
+        {
+            if (!options.TryCache) return null;
+
+            var key = $"{options.TemplateNamespace}:{options.TemplateFilename}:{modelType}:{templateType}:{options.IncludeDebuggingInfo}:{content}";
+
+            if (key.Length > 10240)
+            {
+                var hash = MD5.HashData(Encoding.UTF8.GetBytes(key));
+                key = Convert.ToHexString(hash);
+            }
+
+            return key;
+        }
+
+        /// <summary>
+        /// Clears the internal template cache
+        /// 清除内部模板缓存
+        /// </summary>
+        public static void ClearCache()
+        {
+            templateCache.Clear();
+        }
+
         public IRazorEngineCompiledTemplate<T, M> Compile<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate<M>
         {
             var compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
@@ -21,7 +49,17 @@ namespace RazorEngineCore
 
             builderAction?.Invoke(compilationOptionsBuilder);
 
-            var meta = CreateAndCompileToStream<M>(content, compilationOptionsBuilder, cancellationToken);
+            var cacheKey = CreateCacheKey(content, compilationOptionsBuilder.Options, typeof(M), typeof(T));
+
+            if (cacheKey == null || !templateCache.TryGetValue(cacheKey, out var meta))
+            {
+                meta = CreateAndCompileToStream<M>(content, compilationOptionsBuilder, cancellationToken);
+                if (cacheKey != null) templateCache[cacheKey] = meta;
+            }
+            else
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
 
             return new RazorEngineCompiledTemplate<T, M>(meta);
         }
@@ -37,8 +75,19 @@ namespace RazorEngineCore
             compilationOptionsBuilder.Inherits(typeof(RazorEngineTemplateBase<M>));
 
             builderAction?.Invoke(compilationOptionsBuilder);
- 
-            var meta = CreateAndCompileToStream<M>(content, compilationOptionsBuilder, cancellationToken);
+
+            var cacheKey = CreateCacheKey(content, compilationOptionsBuilder.Options, typeof(M));
+
+            if (cacheKey == null || !templateCache.TryGetValue(cacheKey, out var meta))
+            {
+                meta = CreateAndCompileToStream<M>(content, compilationOptionsBuilder, cancellationToken);
+                if (cacheKey != null) templateCache[cacheKey] = meta;
+            }
+            else
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
             return new RazorEngineCompiledTemplate<M>(meta);
         }
 

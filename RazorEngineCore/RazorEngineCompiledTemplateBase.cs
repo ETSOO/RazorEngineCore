@@ -23,7 +23,7 @@ namespace RazorEngineCore
 
         public void SaveToFile(string fileName)
         {
-            this.SaveToFileAsync(fileName).GetAwaiter().GetResult();
+            SaveToFileAsync(fileName).GetAwaiter().GetResult();
         }
 
         public async Task SaveToFileAsync(string fileName)
@@ -36,29 +36,29 @@ namespace RazorEngineCore
                        bufferSize: 4096,
                        useAsync: true);
 
-            await this.SaveToStreamAsync(fileStream);
+            await SaveToStreamAsync(fileStream);
         }
 
         public void SaveToStream(Stream stream)
         {
-            this.SaveToStreamAsync(stream).GetAwaiter().GetResult();
+            SaveToStreamAsync(stream).GetAwaiter().GetResult();
         }
 
         public Task SaveToStreamAsync(Stream stream)
         {
-            return this.Meta.Write(stream);
+            return Meta.Write(stream);
         }
 
         public void EnableDebugging(string? debuggingOutputDirectory = null)
         {
-            if (this.Meta.PdbByteCode == null || this.Meta.PdbByteCode.Length == 0 || string.IsNullOrWhiteSpace(this.Meta.TemplateSource))
+            if (Meta.PdbByteCode == null || Meta.PdbByteCode.Length == 0 || string.IsNullOrWhiteSpace(this.Meta.TemplateSource))
             {
                 throw new RazorEngineException("No debugging info available, compile template with builder.IncludeDebuggingInfo(); option");
             }
 
-            File.WriteAllText(Path.Combine(debuggingOutputDirectory ?? ".", this.Meta.TemplateFileName), this.Meta.TemplateSource);
+            File.WriteAllText(Path.Combine(debuggingOutputDirectory ?? ".", Meta.TemplateFileName), Meta.TemplateSource);
 
-            this.IsDebuggerEnabled = true;
+            IsDebuggerEnabled = true;
         }
     }
 }
