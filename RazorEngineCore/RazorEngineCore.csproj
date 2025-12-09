@@ -12,7 +12,7 @@
 		<PackageIcon>logo.png</PackageIcon>
 		<PackageId>Etsoo.RazorEngineCore</PackageId>
 		<SignAssembly>true</SignAssembly>
-		<AssemblyOriginatorKeyFile>..\etsoo.snk</AssemblyOriginatorKeyFile>
+		<AssemblyOriginatorKeyFile>etsoo.snk</AssemblyOriginatorKeyFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IsAotCompatible>true</IsAotCompatible>
 	</PropertyGroup>
