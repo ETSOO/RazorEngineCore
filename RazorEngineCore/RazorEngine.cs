@@ -103,6 +103,8 @@ namespace RazorEngineCore
 
         protected virtual RazorEngineCompiledTemplateMeta CreateAndCompileToStream<M>(string templateSource, RazorEngineCompilationOptionsBuilder builder, CancellationToken cancellationToken)
         {
+            builder.AddAssemblyReference(typeof(M).Assembly);
+
             var options = builder.Options;
 
             templateSource = WriteDirectives(templateSource, options);
