@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
+    [RequiresDynamicCode("Creating a call site may require dynamic code generation.")]
     public class RazorEngine : IRazorEngine
     {
         private static readonly ConcurrentDictionary<string, RazorEngineCompiledTemplateMeta> templateCache = new();
@@ -101,8 +103,6 @@ namespace RazorEngineCore
 
         protected virtual RazorEngineCompiledTemplateMeta CreateAndCompileToStream<M>(string templateSource, RazorEngineCompilationOptionsBuilder builder, CancellationToken cancellationToken)
         {
-            builder.AddAssemblyReference(typeof(RazorEngineTemplateBase<M>).Assembly);
-
             var options = builder.Options;
 
             templateSource = WriteDirectives(templateSource, options);
