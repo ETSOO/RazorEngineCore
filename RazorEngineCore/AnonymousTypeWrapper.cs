@@ -1,9 +1,11 @@
 ﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq;
 
 namespace RazorEngineCore
 {
+    [RequiresDynamicCode("Creating a call site may require dynamic code generation.")]
     public class AnonymousTypeWrapper : DynamicObject
     {
         private readonly object model;
@@ -15,7 +17,8 @@ namespace RazorEngineCore
 
         public override bool TryGetMember(GetMemberBinder binder, out object? result)
         {
-            var propertyInfo = model.GetType().GetProperty(binder.Name);
+            var type = model.GetType();
+            var propertyInfo = type.GetProperty(binder.Name);
 
             if (propertyInfo == null)
             {
