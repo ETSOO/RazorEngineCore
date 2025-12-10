@@ -6,11 +6,11 @@ namespace RazorEngineCore
 {
     public interface IRazorEngine
     {
-        IRazorEngineCompiledTemplate<T, M> Compile<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
-            where T : IRazorEngineTemplate<M>;
+        IRazorEngineCompiledTemplate<M> Compile<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
+            where T : IRazorEngineTemplate;
 
-        Task<IRazorEngineCompiledTemplate<T, M>> CompileAsync<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
-            where T : IRazorEngineTemplate<M>;
+        Task<IRazorEngineCompiledTemplate<M>> CompileAsync<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
+            where T : IRazorEngineTemplate;
 
         IRazorEngineCompiledTemplate<M> Compile<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default);
 

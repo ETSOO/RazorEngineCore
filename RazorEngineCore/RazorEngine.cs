@@ -41,7 +41,7 @@ namespace RazorEngineCore
             templateCache.Clear();
         }
 
-        public IRazorEngineCompiledTemplate<T, M> Compile<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate<M>
+        public IRazorEngineCompiledTemplate<M> Compile<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate
         {
             var compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
             compilationOptionsBuilder.AddAssemblyReference(typeof(T).Assembly);
@@ -64,7 +64,7 @@ namespace RazorEngineCore
             return new RazorEngineCompiledTemplate<T, M>(meta);
         }
 
-        public Task<IRazorEngineCompiledTemplate<T, M>> CompileAsync<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate<M>
+        public Task<IRazorEngineCompiledTemplate<M>> CompileAsync<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate
         {
             return Task.Run(() => Compile<T, M>(content: content, builderAction: builderAction, cancellationToken: cancellationToken));
         }

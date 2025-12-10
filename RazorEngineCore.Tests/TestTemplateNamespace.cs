@@ -30,7 +30,7 @@ namespace RazorEngineCore.Tests
             var initialTemplate = razorEngine.Compile<TestTemplate2, TestModel>("@{ var message = \"OK\"; }@message",
                 builder => { builder.Options.TemplateNamespace = "Test.Namespace"; }, TestContext.CancellationToken);
 
-            var result = initialTemplate.Run(a => { });
+            var result = initialTemplate.Run(new TestModel { });
 
             Assert.AreEqual("OK", result);
         }

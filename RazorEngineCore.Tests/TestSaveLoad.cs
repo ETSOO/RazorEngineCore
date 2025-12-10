@@ -55,17 +55,14 @@ namespace RazorEngineCore.Tests
 
             var loadedTemplate = RazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>, TestModel>.LoadFromFile("testTemplate.dll");
 
-            static void action(RazorEngineTemplateBase<TestModel> initializer)
+            var model = new TestModel()
             {
-                initializer.Model = new TestModel()
-                {
-                    A = 12345,
-                    C = "Alex"
-                };
-            }
+                A = 12345,
+                C = "Alex"
+            };
 
-            var initialTemplateResult = initialTemplate.Run(action);
-            var loadedTemplateResult = loadedTemplate.Run(action);
+            var initialTemplateResult = initialTemplate.Run(model);
+            var loadedTemplateResult = loadedTemplate.Run(model);
 
             Assert.AreEqual(initialTemplateResult, loadedTemplateResult);
         }

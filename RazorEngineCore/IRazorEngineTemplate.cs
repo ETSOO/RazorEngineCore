@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
-    public interface IRazorEngineTemplate<M>
+    public interface IRazorEngineTemplate
     {
         RazorEngineHtmlSafeTemplateHtml Html { get; }
 
-        M Model { get; set; }
+        object? Model { get; set; }
 
         Action Breakpoint { get; set; }
 

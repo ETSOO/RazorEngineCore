@@ -237,7 +237,7 @@ namespace RazorEngineCore.Tests
 
             var template = razorEngine.Compile<TestTemplate2, TestModel>("DateTime: @Model.DateTime.Value.ToString()", cancellationToken: TestContext.CancellationToken);
 
-            string actual = template.Run(instance => instance.Model = new TestModel()
+            var actual = template.Run(new TestModel()
             {
                 DateTime = dateTime
             });
@@ -254,7 +254,7 @@ namespace RazorEngineCore.Tests
 
             var template = razorEngine.Compile<TestTemplate2, TestModel>("DateTime: @Model.DateTime", cancellationToken: TestContext.CancellationToken);
 
-            string actual = template.Run(instance => instance.Model = new TestModel()
+            var actual = template.Run(new TestModel()
             {
                 DateTime = dateTime
             });
@@ -478,8 +478,9 @@ void RecursionTest(int level)
             var razorEngine = new RazorEngine();
             var template = razorEngine.Compile<TestTemplate1, object>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: TestContext.CancellationToken);
 
-            string actual = template.Run(instance =>
+            var actual = template.Execute((template) =>
             {
+                var instance = (TestTemplate1)template;
                 instance.A = 1;
                 instance.B = 2;
                 instance.C = "Alex";
@@ -494,8 +495,9 @@ void RecursionTest(int level)
             var razorEngine = new RazorEngine();
             var template = await razorEngine.CompileAsync<TestTemplate1, object>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: TestContext.CancellationToken);
 
-            string actual = await template.RunAsync(instance =>
+            var actual = await template.ExecuteAsync((template) =>
             {
+                var instance = (TestTemplate1)template;
                 instance.A = 1;
                 instance.B = 2;
                 instance.C = "Alex";
@@ -510,12 +512,9 @@ void RecursionTest(int level)
             var razorEngine = new RazorEngine();
             var template = razorEngine.Compile<TestTemplate2, TestModel>("Hello @Model.Decorator(Model.C)", cancellationToken: TestContext.CancellationToken);
 
-            string actual = template.Run(instance =>
+            var actual = template.Run(new TestModel
             {
-                instance.Initialize(new TestModel
-                {
-                    C = "Alex"
-                });
+                C = "Alex"
             });
 
             Assert.AreEqual("Hello -=Alex=-", actual);
@@ -532,12 +531,9 @@ Hello @Model.Decorator(Model.C)
             var razorEngine = new RazorEngine();
             var template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>, TestModel>(templateText, cancellationToken: TestContext.CancellationToken);
 
-            string actual = template.Run(instance =>
+            var actual = template.Run(new TestModel
             {
-                instance.Model = new TestModel
-                {
-                    C = "Alex"
-                };
+                C = "Alex"
             });
 
             Assert.AreEqual("Hello -=Alex=-", actual.Trim());
@@ -549,12 +545,9 @@ Hello @Model.Decorator(Model.C)
             var razorEngine = new RazorEngine();
             var template = await razorEngine.CompileAsync<TestTemplate2, TestModel>("Hello @Model.Decorator(Model.C)", cancellationToken: TestContext.CancellationToken);
 
-            string actual = await template.RunAsync(instance =>
+            var actual = await template.RunAsync(new TestModel
             {
-                instance.Initialize(new TestModel
-                {
-                    C = "Alex"
-                });
+                C = "Alex"
             });
 
             Assert.AreEqual("Hello -=Alex=-", actual);
@@ -576,12 +569,9 @@ Hello @Model.Decorator(Model.C)
     <p>2</p>
     <p>1</p>
 ";
-            string actual = template.Run(instance =>
+            var actual = template.Run(new TestModel
             {
-                instance.Initialize(new TestModel
-                {
-                    Numbers = [2, 1, 3]
-                });
+                Numbers = [2, 1, 3]
             });
 
             Assert.AreEqual(expected, actual);
@@ -604,12 +594,9 @@ Hello @Model.Decorator(Model.C)
     <p>2</p>
     <p>1</p>
 ";
-            string actual = template.Run(instance =>
+            var actual = template.Run(new TestModel
             {
-                instance.Initialize(new TestModel
-                {
-                    Numbers = [2, 1, 3]
-                });
+                Numbers = [2, 1, 3]
             });
 
             Assert.AreEqual(expected, actual);
@@ -655,12 +642,9 @@ Hello @Model.Decorator(Model.C)
     <p>2</p>
     <p>1</p>
 ";
-            string actual = await template.RunAsync(instance =>
+            var actual = await template.RunAsync(new TestModel
             {
-                instance.Initialize(new TestModel
-                {
-                    Numbers = [2, 1, 3]
-                });
+                Numbers = [2, 1, 3]
             });
 
             Assert.AreEqual(expected, actual);
@@ -824,12 +808,9 @@ Hello @Model.Decorator(Model.C)
                 builder.IncludeDebuggingInfo();
             }, TestContext.CancellationToken);
 
-            string actual = template.Run(instance =>
+            var actual = template.Run(new TestModel
             {
-                instance.Model = new TestModel
-                {
-                    C = "Alex"
-                };
+                C = "Alex"
             });
 
             Assert.AreEqual("Hello -=Alex=-", actual.Trim());
@@ -868,12 +849,9 @@ Hello @Model.Decorator(Model.C)
 
             template.EnableDebugging();
 
-            string actual = template.Run(instance =>
+            var actual = template.Run(new TestModel
             {
-                instance.Model = new TestModel
-                {
-                    C = "Alex"
-                };
+                C = "Alex"
             });
 
             Assert.AreEqual("Hello -=Alex=-", actual.Trim());

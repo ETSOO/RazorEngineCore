@@ -27,7 +27,7 @@ namespace RazorEngineCore
         }
     }
 
-    public abstract class RazorEngineTemplateBase<M> : IRazorEngineTemplate<M>
+    public abstract class RazorEngineTemplateBase<M> : IRazorEngineTemplate
     {
         /// <summary>
         /// Simulate the Html object in Razor
@@ -43,7 +43,13 @@ namespace RazorEngineCore
         /// Data model
         /// 数据模型
         /// </summary>
-        public required M Model { get; set; }
+        public M? Model { get; set; }
+
+        object? IRazorEngineTemplate.Model
+        {
+            get => Model;
+            set => Model = (M?)value;
+        }
 
         public Action Breakpoint { get; set; } = () => { };
 

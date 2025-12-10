@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace RazorEngineCore
@@ -17,6 +19,10 @@ namespace RazorEngineCore
 
         string Run(M model);
 
+        string Execute(Action<IRazorEngineTemplate> action);
+
         Task<string> RunAsync(M model);
+
+        Task<string> ExecuteAsync(Action<IRazorEngineTemplate> action);
     }
 }

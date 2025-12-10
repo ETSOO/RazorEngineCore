@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
-    public class RazorEngineCompiledTemplate<T, M> : RazorEngineCompiledTemplateBase, IRazorEngineCompiledTemplate<T, M> where T : IRazorEngineTemplate<M>
+    public class RazorEngineCompiledTemplate<T, M> : RazorEngineCompiledTemplateBase, IRazorEngineCompiledTemplate<M> where T : IRazorEngineTemplate
     {
         public RazorEngineCompiledTemplate(RazorEngineCompiledTemplateMeta meta) : base(meta)
         {
@@ -28,7 +28,7 @@ namespace RazorEngineCore
             return await LoadFromStreamAsync(fileStream);
         }
 
-        public static IRazorEngineCompiledTemplate<T, M> LoadFromStream(Stream stream)
+        public static IRazorEngineCompiledTemplate<M> LoadFromStream(Stream stream)
         {
             return LoadFromStreamAsync(stream).GetAwaiter().GetResult();
         }
@@ -40,27 +40,36 @@ namespace RazorEngineCore
 
         public string Run(M model)
         {
-            return Run((obj) => obj.Model = model);
+            return Execute((template) => template.Model = model);
         }
 
-        public string Run(Action<T> initializer)
+        public string Execute(Action<IRazorEngineTemplate> action)
         {
-            return RunAsync(initializer).GetAwaiter().GetResult();
+            return ExecuteAsync(action).GetAwaiter().GetResult();
         }
 
         public Task<string> RunAsync(M model)
         {
-            return RunAsync((obj) => obj.Model = model);
+            return ExecuteAsync((template) => template.Model = model);
         }
 
-        public async Task<string> RunAsync(Action<T> initializer)
+        public async Task<string> ExecuteAsync(Action<IRazorEngineTemplate> action)
         {
-            var instance = (T)(Activator.CreateInstance(TemplateType) ?? throw new Exception("Failed to create template instance"));
-            initializer(instance);
+            var instance = (IRazorEngineTemplate)(Activator.CreateInstance(TemplateType) ?? throw new Exception("Failed to create template instance"));
 
-            if (instance.Model != null && typeof(M) == ObjectExtenders.ObjectType)
+            action(instance);
+
+            var model = instance.Model;
+            if(model != null)
             {
-                instance.Model = (dynamic)(new AnonymousTypeWrapper(instance.Model));
+                if (typeof(M) == ObjectExtenders.ObjectType)
+                {
+                    instance.Model = new AnonymousTypeWrapper(model);
+                }
+                else
+                {
+                    instance.Model = model;
+                }
             }
 
             if (IsDebuggerEnabled && instance is T instance2)
@@ -71,6 +80,6 @@ namespace RazorEngineCore
             await instance.ExecuteAsync();
 
             return await instance.ResultAsync();
-		}
+        }
     }
 }
