@@ -103,8 +103,6 @@ namespace RazorEngineCore
 
         protected virtual RazorEngineCompiledTemplateMeta CreateAndCompileToStream<M>(string templateSource, RazorEngineCompilationOptionsBuilder builder, CancellationToken cancellationToken)
         {
-            builder.AddAssemblyReference(typeof(M).Assembly);
-
             var options = builder.Options;
 
             templateSource = WriteDirectives(templateSource, options);
@@ -146,9 +144,9 @@ namespace RazorEngineCore
                            unsafe
                            {
                                ass.TryGetRawMetadata(out byte* blob, out int length);
-                               ModuleMetadata moduleMetadata = ModuleMetadata.CreateFromMetadata((IntPtr)blob, length);
-                               AssemblyMetadata assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
-                               PortableExecutableReference metadataReference = assemblyMetadata.GetReference();
+                               var moduleMetadata = ModuleMetadata.CreateFromMetadata((IntPtr)blob, length);
+                               var assemblyMetadata = AssemblyMetadata.Create(moduleMetadata);
+                               var metadataReference = assemblyMetadata.GetReference();
 
                                return metadataReference;
                            }

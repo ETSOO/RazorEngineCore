@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Threading.Tasks;
 
 namespace RazorEngineCore
@@ -17,7 +18,10 @@ namespace RazorEngineCore
         {
             Meta = meta;
 
-            var assembly = Assembly.Load(meta.AssemblyByteCode ?? [], meta.PdbByteCode);
+            var assemblyStream = new MemoryStream(meta.AssemblyByteCode ?? []);
+            var pdbStream = meta.PdbByteCode != null ? new MemoryStream(meta.PdbByteCode) : null;
+            var assembly = AssemblyLoadContext.Default.LoadFromStream(assemblyStream, pdbStream);
+
             TemplateType = assembly.GetType(meta.TemplateNamespace + ".Template") ?? throw new Exception("Failed to load template type");
         }
 

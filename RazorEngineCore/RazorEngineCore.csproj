@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
-		<Version>1.0.8</Version>
+		<Version>1.0.9</Version>
 		<Nullable>enable</Nullable>
 		<Authors>Alexander Selishchev, Simon Mourier, William David Cossey, Benjamin Smith, Dag H. Baardsen, krmr, jddj007-hydra, shehrozeee, TheAtomicOption, ItWorksOnMyMachine, garryxiao</Authors>
 		<PackageProjectUrl>https://github.com/etsoo/RazorEngineCore</PackageProjectUrl>

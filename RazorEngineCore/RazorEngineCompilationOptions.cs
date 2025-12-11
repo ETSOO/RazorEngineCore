@@ -11,7 +11,6 @@ namespace RazorEngineCore
         private static readonly HashSet<Assembly> DefaultAssemblies = [
                     typeof(object).Assembly,
                     Assembly.Load(new AssemblyName("Microsoft.CSharp")),
-                    typeof(IRazorEngineTemplate).Assembly,
                     typeof(RazorEngineTemplateBase<>).Assembly,
                     Assembly.Load(new AssemblyName("System.Runtime")),
                     typeof(System.Collections.IList).Assembly,
