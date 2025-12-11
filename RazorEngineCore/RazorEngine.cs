@@ -43,7 +43,7 @@ namespace RazorEngineCore
             templateCache.Clear();
         }
 
-        public IRazorEngineCompiledTemplate<M> Compile<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate
+        public IRazorEngineCompiledTemplate<T, M> Compile<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate
         {
             var compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
             compilationOptionsBuilder.AddAssemblyReference(typeof(T).Assembly);
@@ -66,12 +66,12 @@ namespace RazorEngineCore
             return new RazorEngineCompiledTemplate<T, M>(meta);
         }
 
-        public Task<IRazorEngineCompiledTemplate<M>> CompileAsync<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate
+        public Task<IRazorEngineCompiledTemplate<T, M>> CompileAsync<T, M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default) where T : IRazorEngineTemplate
         {
             return Task.Run(() => Compile<T, M>(content: content, builderAction: builderAction, cancellationToken: cancellationToken));
         }
 
-        public IRazorEngineCompiledTemplate<M> Compile<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
+        public IRazorEngineCompiledTemplate<RazorEngineTemplateBase<M>, M> Compile<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
         {
             var compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
             compilationOptionsBuilder.Inherits(typeof(RazorEngineTemplateBase<M>));
@@ -93,7 +93,7 @@ namespace RazorEngineCore
             return new RazorEngineCompiledTemplate<M>(meta);
         }
 
-        public Task<IRazorEngineCompiledTemplate<M>> CompileAsync<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
+        public Task<IRazorEngineCompiledTemplate<RazorEngineTemplateBase<M>, M>> CompileAsync<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
         {
             return Task.Run(() => Compile<M>(
                 content, 

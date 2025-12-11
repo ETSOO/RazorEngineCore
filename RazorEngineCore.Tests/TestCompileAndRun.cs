@@ -478,9 +478,8 @@ void RecursionTest(int level)
             var razorEngine = new RazorEngine();
             var template = razorEngine.Compile<TestTemplate1, object>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: TestContext.CancellationToken);
 
-            var actual = template.Execute((template) =>
+            var actual = template.Execute((instance) =>
             {
-                var instance = (TestTemplate1)template;
                 instance.A = 1;
                 instance.B = 2;
                 instance.C = "Alex";
@@ -495,9 +494,8 @@ void RecursionTest(int level)
             var razorEngine = new RazorEngine();
             var template = await razorEngine.CompileAsync<TestTemplate1, object>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: TestContext.CancellationToken);
 
-            var actual = await template.ExecuteAsync((template) =>
+            var actual = await template.ExecuteAsync((instance) =>
             {
-                var instance = (TestTemplate1)template;
                 instance.A = 1;
                 instance.B = 2;
                 instance.C = "Alex";

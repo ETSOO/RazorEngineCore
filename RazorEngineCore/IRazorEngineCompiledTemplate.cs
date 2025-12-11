@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
-    public interface IRazorEngineCompiledTemplate<M>
+    public interface IRazorEngineCompiledTemplate<T, M> where T : IRazorEngineTemplate
     {
         void SaveToStream(Stream stream);
 
@@ -19,10 +18,10 @@ namespace RazorEngineCore
 
         string Run(M model);
 
-        string Execute(Action<IRazorEngineTemplate> action);
+        string Execute(Action<T> action);
 
         Task<string> RunAsync(M model);
 
-        Task<string> ExecuteAsync(Action<IRazorEngineTemplate> action);
+        Task<string> ExecuteAsync(Action<T> action);
     }
 }

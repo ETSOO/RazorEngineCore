@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
-    public class RazorEngineCompiledTemplate<T, M> : RazorEngineCompiledTemplateBase, IRazorEngineCompiledTemplate<M> where T : IRazorEngineTemplate
+    public class RazorEngineCompiledTemplate<T, M> : RazorEngineCompiledTemplateBase, IRazorEngineCompiledTemplate<T, M> where T : IRazorEngineTemplate
     {
         public RazorEngineCompiledTemplate(RazorEngineCompiledTemplateMeta meta) : base(meta)
         {
@@ -28,7 +28,7 @@ namespace RazorEngineCore
             return await LoadFromStreamAsync(fileStream);
         }
 
-        public static IRazorEngineCompiledTemplate<M> LoadFromStream(Stream stream)
+        public static IRazorEngineCompiledTemplate<T, M> LoadFromStream(Stream stream)
         {
             return LoadFromStreamAsync(stream).GetAwaiter().GetResult();
         }
@@ -43,7 +43,7 @@ namespace RazorEngineCore
             return Execute((template) => template.Model = model);
         }
 
-        public string Execute(Action<IRazorEngineTemplate> action)
+        public string Execute(Action<T> action)
         {
             return ExecuteAsync(action).GetAwaiter().GetResult();
         }
@@ -53,9 +53,9 @@ namespace RazorEngineCore
             return ExecuteAsync((template) => template.Model = model);
         }
 
-        public async Task<string> ExecuteAsync(Action<IRazorEngineTemplate> action)
+        public async Task<string> ExecuteAsync(Action<T> action)
         {
-            var instance = (IRazorEngineTemplate)(Activator.CreateInstance(TemplateType) ?? throw new Exception("Failed to create template instance"));
+            var instance = (T)(Activator.CreateInstance(TemplateType) ?? throw new Exception("Failed to create template instance"));
 
             action(instance);
 
