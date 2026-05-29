@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
-		<Version>1.0.14</Version>
+		<Version>1.0.15</Version>
 		<Nullable>enable</Nullable>
 		<Authors>Alexander Selishchev, Simon Mourier, William David Cossey, Benjamin Smith, Dag H. Baardsen, krmr, jddj007-hydra, shehrozeee, TheAtomicOption, ItWorksOnMyMachine, garryxiao</Authors>
 		<PackageProjectUrl>https://github.com/etsoo/RazorEngineCore</PackageProjectUrl>
@@ -14,7 +14,10 @@
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\etsoo.snk</AssemblyOriginatorKeyFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<IsAotCompatible>true</IsAotCompatible>
+		<IsAotCompatible>false</IsAotCompatible>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<SatelliteResourceLanguages>en;zh-Hans;zh-Hant</SatelliteResourceLanguages>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -33,9 +36,12 @@
 	  </None>
 	</ItemGroup>
 	<ItemGroup>
+		<None Include="$(OutputPath)\Microsoft.AspNetCore.Razor.Language.dll" Pack="true" PackagePath="lib/net10.0/" />
+		<None Include="$(OutputPath)\RazorEngineCore.deps.json" Pack="true" PackagePath="lib/net10.0/" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="6.0.36" />
-		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.6.3" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.300" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.6.3" ExcludeAssets="runtime" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" ExcludeAssets="runtime" />
 	</ItemGroup>
 </Project>
