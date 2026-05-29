@@ -8,6 +8,7 @@ namespace RazorEngineCore.Tasks
 {
     /// <summary>
     /// Compile Razor templates in the specified project directory before the build process
+    /// Another idea is inline task: https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-inline-tasks?view=visualstudio
     /// 在构建过程之前编译指定项目目录中的 Razor 模板
     /// </summary>
     public class CompileTemplatesTask : Task

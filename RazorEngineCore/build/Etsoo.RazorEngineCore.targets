@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+	<RazorEngineCore_TemplateDir Condition="'$(RazorEngineCore_TemplateDir)' == ''">$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
+	<RazorEngineCore_EnableCompileTemplates Condition="'$(RazorEngineCore_EnableCompileTemplates)' == ''">false</RazorEngineCore_EnableCompileTemplates>
+  </PropertyGroup>
+
+  <UsingTask TaskName="RazorEngineCore.Tasks.CompileTemplatesTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\$(TargetFramework)\Etsoo.RazorEngineCore.dll" />
+
+  <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="BeforeBuild" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
+	<CompileTemplatesTask TemplateDir="$(RazorEngineCore_TemplateDir)" />
+  </Target>
+
+</Project>
