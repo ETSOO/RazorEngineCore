@@ -6,7 +6,7 @@
 	<RazorEngineCore_EnableCompileTemplates Condition="'$(RazorEngineCore_EnableCompileTemplates)' == ''">false</RazorEngineCore_EnableCompileTemplates>
   </PropertyGroup>
 
-  <UsingTask TaskName="RazorEngineCore.Tasks.CompileTemplatesTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\$(TargetFramework)\Etsoo.RazorEngineCore.dll" />
+  <UsingTask TaskName="RazorEngineCore.Tasks.CompileTemplatesTask" AssemblyFile="$(MSBuildThisFileDirectory)..\lib\net10.0\RazorEngineCore.dll" />
 
   <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="BeforeBuild" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
 	<CompileTemplatesTask TemplateDir="$(RazorEngineCore_TemplateDir)" />
