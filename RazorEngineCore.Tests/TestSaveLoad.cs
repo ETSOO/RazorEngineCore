@@ -20,9 +20,36 @@ namespace RazorEngineCore.Tests
 
             var loadedTemplate = RazorEngineCompiledTemplate<TestNameModel>.LoadFromStream(memoryStream);
 
-            var initialTemplateResult = initialTemplate.Run(new TestNameModel { Name = "Alex" });
-            var loadedTemplateResult = loadedTemplate.Run(new TestNameModel { Name = "Alex" });
-            
+            var data = new TestNameModel { Name = "Alex" };
+
+            var initialTemplateResult = initialTemplate.Run(data);
+            var loadedTemplateResult = loadedTemplate.Run(data);
+
+            Assert.AreEqual("Hello Alex", initialTemplateResult);
+            Assert.AreEqual(initialTemplateResult, loadedTemplateResult);
+
+            var updatedResult = loadedTemplate.Run(new TestNameModel { Name = "John" });
+            Assert.AreEqual("Hello John", updatedResult);
+        }
+
+        [TestMethod]
+        public void TestSaveWithObjectToStream()
+        {
+            var razorEngine = new RazorEngine();
+            var initialTemplate = razorEngine.Compile<object>("Hello @Model.Name", cancellationToken: TestContext.CancellationToken);
+
+            using var memoryStream = new MemoryStream();
+            initialTemplate.SaveToStream(memoryStream);
+            memoryStream.Position = 0;
+
+            var loadedTemplate = RazorEngineCompiledTemplate<object>.LoadFromStream(memoryStream);
+
+            var data = new TestNameModel { Name = "Alex" };
+
+            var initialTemplateResult = initialTemplate.Run(data);
+            var loadedTemplateResult = loadedTemplate.Run(data);
+
+            Assert.AreEqual("Hello Alex", initialTemplateResult);
             Assert.AreEqual(initialTemplateResult, loadedTemplateResult);
         }
 

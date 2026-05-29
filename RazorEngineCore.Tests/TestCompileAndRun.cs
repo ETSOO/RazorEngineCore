@@ -45,6 +45,40 @@ namespace RazorEngineCore.Tests
         }
 
         [TestMethod]
+        public void TestCompileModelDirectiveAndRun_HtmlLiteral()
+        {
+            var data = new TestNameModel { Name = "Alex" };
+
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<TestNameModel>("""
+                @model RazorEngineCore.Tests.Models.TestNameModel
+
+                <h1>Hello @Model.Name</h1>
+                """, cancellationToken: TestContext.CancellationToken);
+
+            var actual = template.Run(data);
+
+            Assert.AreEqual("<h1>Hello Alex</h1>", actual);
+        }
+
+        [TestMethod]
+        public void TestCompileDynamicModelDirectiveAndRun_HtmlLiteral()
+        {
+            var data = new TestNameModel { Name = "Alex" };
+
+            var razorEngine = new RazorEngine();
+            var template = razorEngine.Compile<dynamic>("""
+                @model RazorEngineCore.Tests.Models.TestNameModel
+
+                <h1>Hello @Model.Name</h1>
+                """, cancellationToken: TestContext.CancellationToken);
+
+            var actual = template.Run(data);
+
+            Assert.AreEqual("<h1>Hello Alex</h1>", actual);
+        }
+
+        [TestMethod]
         public async Task TestCompileAndRun_HtmlLiteralAsync()
         {
             var razorEngine = new RazorEngine();

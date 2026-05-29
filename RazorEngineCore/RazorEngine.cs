@@ -9,13 +9,14 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
     [RequiresDynamicCode("Creating a call site may require dynamic code generation.")]
-    public class RazorEngine : IRazorEngine
+    public partial class RazorEngine : IRazorEngine
     {
         private static readonly ConcurrentDictionary<string, RazorEngineCompiledTemplateMeta> templateCache = new();
 
@@ -55,7 +56,7 @@ namespace RazorEngineCore
 
             if (cacheKey == null || !templateCache.TryGetValue(cacheKey, out var meta))
             {
-                meta = CreateAndCompileToStream<M>(content, compilationOptionsBuilder, cancellationToken);
+                meta = CreateAndCompileToStream(content, compilationOptionsBuilder, cancellationToken);
                 if (cacheKey != null) templateCache[cacheKey] = meta;
             }
             else
@@ -82,7 +83,7 @@ namespace RazorEngineCore
 
             if (cacheKey == null || !templateCache.TryGetValue(cacheKey, out var meta))
             {
-                meta = CreateAndCompileToStream<M>(content, compilationOptionsBuilder, cancellationToken);
+                meta = CreateAndCompileToStream(content, compilationOptionsBuilder, cancellationToken);
                 if (cacheKey != null) templateCache[cacheKey] = meta;
             }
             else
@@ -101,7 +102,7 @@ namespace RazorEngineCore
                 cancellationToken));
         }
 
-        protected virtual RazorEngineCompiledTemplateMeta CreateAndCompileToStream<M>(string templateSource, RazorEngineCompilationOptionsBuilder builder, CancellationToken cancellationToken)
+        protected virtual RazorEngineCompiledTemplateMeta CreateAndCompileToStream(string templateSource, RazorEngineCompilationOptionsBuilder builder, CancellationToken cancellationToken)
         {
             var options = builder.Options;
 
@@ -185,8 +186,38 @@ namespace RazorEngineCore
             };
         }
 
+        private void ParseModelDirective(ref string content, RazorEngineCompilationOptions options)
+        {
+            var regex = ModelRegex();
+
+            var match = regex.Match(content);
+
+            if (match.Success)
+            {
+                //var modelType = match.Groups[1].Value.Trim();
+
+                //if (!string.IsNullOrEmpty(modelType))
+                //{
+                //    // Get the type
+                //    var type = Type.GetType(modelType) ?? AppDomain.CurrentDomain
+                //        .GetAssemblies()
+                //        .Select(a => a.GetType(modelType))
+                //        .FirstOrDefault(t => t != null);
+                //}
+
+                // Remove the directive line
+                content = regex.Replace(content, "", 1);
+
+                // Remove the empty line left by the directive
+                content = BlankRegex().Replace(content, "");
+            }
+        }
+
         protected virtual string WriteDirectives(string content, RazorEngineCompilationOptions options)
         {
+            // Parse the @modle directive
+            ParseModelDirective(ref content, options);
+
             var stringBuilder = new StringBuilder();
 
             // For dynamic object, replace System.Object with dynamic to pass the build.
@@ -201,5 +232,11 @@ namespace RazorEngineCore
 
             return stringBuilder.ToString();
         }
+
+        [GeneratedRegex(@"^\s*@model\s+([^\r\n]+)\s*$\r?\n?", RegexOptions.Multiline)]
+        private static partial Regex ModelRegex();
+
+        [GeneratedRegex(@"^\s*\r?\n", RegexOptions.Multiline)]
+        private static partial Regex BlankRegex();
     }
 }

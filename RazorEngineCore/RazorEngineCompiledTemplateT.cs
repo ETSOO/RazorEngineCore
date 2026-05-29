@@ -62,7 +62,10 @@ namespace RazorEngineCore
             var model = instance.Model;
             if(model != null)
             {
-                if (typeof(M) == ObjectExtenders.ObjectType)
+                var type = model.GetType();
+
+                // type is object or anonymous type
+                if (typeof(M) == ObjectExtenders.ObjectType && (type == ObjectExtenders.ObjectType || type.Name.Contains("AnonymousType")))
                 {
                     instance.Model = new AnonymousTypeWrapper(model);
                 }
