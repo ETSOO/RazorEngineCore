@@ -269,7 +269,7 @@ namespace RazorEngineCore.Tests
 
             DateTime? dateTime = DateTime.Now;
 
-            var template = razorEngine.Compile<TestTemplate2, TestModel>("DateTime: @Model.DateTime.Value.ToString()", cancellationToken: TestContext.CancellationToken);
+            var template = razorEngine.Compile<TestModel>("DateTime: @Model.DateTime.Value.ToString()", cancellationToken: TestContext.CancellationToken);
 
             var actual = template.Run(new TestModel()
             {
@@ -286,7 +286,7 @@ namespace RazorEngineCore.Tests
 
             DateTime? dateTime = null;
 
-            var template = razorEngine.Compile<TestTemplate2, TestModel>("DateTime: @Model.DateTime", cancellationToken: TestContext.CancellationToken);
+            var template = razorEngine.Compile<TestModel>("DateTime: @Model.DateTime", cancellationToken: TestContext.CancellationToken);
 
             var actual = template.Run(new TestModel()
             {
@@ -507,42 +507,10 @@ void RecursionTest(int level)
         }
 
         [TestMethod]
-        public void TestCompileAndRun_TypedModel1()
-        {
-            var razorEngine = new RazorEngine();
-            var template = razorEngine.Compile<TestTemplate1, object>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: TestContext.CancellationToken);
-
-            var actual = template.Execute((instance) =>
-            {
-                instance.A = 1;
-                instance.B = 2;
-                instance.C = "Alex";
-            });
-
-            Assert.AreEqual("Hello 1 2 3 Alex -=777=-", actual);
-        }
-
-        [TestMethod]
-        public async Task TestCompileAndRun_TypedModel1Async()
-        {
-            var razorEngine = new RazorEngine();
-            var template = await razorEngine.CompileAsync<TestTemplate1, object>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: TestContext.CancellationToken);
-
-            var actual = await template.ExecuteAsync((instance) =>
-            {
-                instance.A = 1;
-                instance.B = 2;
-                instance.C = "Alex";
-            });
-
-            Assert.AreEqual("Hello 1 2 3 Alex -=777=-", actual);
-        }
-
-        [TestMethod]
         public void TestCompileAndRun_TypedModel2()
         {
             var razorEngine = new RazorEngine();
-            var template = razorEngine.Compile<TestTemplate2, TestModel>("Hello @Model.Decorator(Model.C)", cancellationToken: TestContext.CancellationToken);
+            var template = razorEngine.Compile<TestModel>("Hello @Model.Decorator(Model.C)", cancellationToken: TestContext.CancellationToken);
 
             var actual = template.Run(new TestModel
             {
@@ -561,7 +529,7 @@ Hello @Model.Decorator(Model.C)
 ";
 
             var razorEngine = new RazorEngine();
-            var template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>, TestModel>(templateText, cancellationToken: TestContext.CancellationToken);
+            var template = razorEngine.Compile<TestModel>(templateText, cancellationToken: TestContext.CancellationToken);
 
             var actual = template.Run(new TestModel
             {
@@ -575,7 +543,7 @@ Hello @Model.Decorator(Model.C)
         public async Task TestCompileAndRun_TypedModel2Async()
         {
             var razorEngine = new RazorEngine();
-            var template = await razorEngine.CompileAsync<TestTemplate2, TestModel>("Hello @Model.Decorator(Model.C)", cancellationToken: TestContext.CancellationToken);
+            var template = await razorEngine.CompileAsync<TestModel>("Hello @Model.Decorator(Model.C)", cancellationToken: TestContext.CancellationToken);
 
             var actual = await template.RunAsync(new TestModel
             {
@@ -589,7 +557,7 @@ Hello @Model.Decorator(Model.C)
         public void TestCompileAndRun_AnonymousModelWithArrayOfObjects()
         {
             var razorEngine = new RazorEngine();
-            var template = razorEngine.Compile<TestTemplate2, TestModel>(
+            var template = razorEngine.Compile<TestModel>(
 @"
 @foreach (var item in Model.Numbers.OrderByDescending(x => x))
 {
@@ -614,7 +582,7 @@ Hello @Model.Decorator(Model.C)
         public void TestCompileAndRun_StronglyTypedModelLinq()
         {
             var razorEngine = new RazorEngine();
-            var template = razorEngine.Compile<TestTemplate2, TestModel>(
+            var template = razorEngine.Compile<TestModel>(
 @"
 @foreach (var item in Model.Numbers.OrderByDescending(x => x))
 {
@@ -662,7 +630,7 @@ Hello @Model.Decorator(Model.C)
         public async Task TestCompileAndRun_LinqAsync()
         {
             var razorEngine = new RazorEngine();
-            var template = await razorEngine.CompileAsync<TestTemplate2, TestModel>(
+            var template = await razorEngine.CompileAsync<TestModel>(
 @"
 @foreach (var item in Model.Numbers.OrderByDescending(x => x))
 {
@@ -770,34 +738,6 @@ namespace TestAssembly
             });
         }
 
-        [TestMethod]
-        public void TestCompileCancellation_TypedModel1()
-        {
-            var razorEngine = new RazorEngine();
-
-            using var cancellationSource = new CancellationTokenSource();
-            cancellationSource.Cancel();
-
-            Assert.Throws<OperationCanceledException>(() =>
-            {
-                _ = razorEngine.Compile<TestTemplate1>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: cancellationSource.Token);
-            });
-        }
-
-        [TestMethod]
-        public async Task TestCompileCancellation_TypedModel1Async()
-        {
-            var razorEngine = new RazorEngine();
-
-            using var cancellationSource = new CancellationTokenSource();
-            cancellationSource.Cancel();
-
-            await Assert.ThrowsAsync<OperationCanceledException>(async () =>
-            {
-                _ = await razorEngine.CompileAsync<TestTemplate1>("Hello @A @B @(A + B) @C @Decorator(\"777\")", cancellationToken: cancellationSource.Token);
-            });
-        }
-
         private static List<MetadataReference> GetMetadataReferences()
         {
             if (RuntimeInformation.FrameworkDescription.StartsWith(
@@ -830,12 +770,12 @@ namespace TestAssembly
         public void TestCompileAndRun_IncludeDebuggingForTypedMode_DisabledDebugging()
         {
             string templateText = @"
-@inherits RazorEngineCore.RazorEngineTemplateBase<RazorEngineCore.Tests.Models.TestModel>
+@inherits RazorEngineCore.RazorEngineTemplate<RazorEngineCore.Tests.Models.TestModel>
 Hello @Model.Decorator(Model.C)
 ";
 
             var razorEngine = new RazorEngine();
-            var template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>, TestModel>(templateText, builder =>
+            var template = razorEngine.Compile<TestModel>(templateText, builder =>
             {
                 builder.IncludeDebuggingInfo();
             }, TestContext.CancellationToken);
@@ -869,12 +809,12 @@ Hello @Model.Decorator(Model.C)
         public void TestCompileAndRun_IncludeDebuggingForTypedMode_EnabledDebugging()
         {
             string templateText = @"
-@inherits RazorEngineCore.RazorEngineTemplateBase<RazorEngineCore.Tests.Models.TestModel>
+@inherits RazorEngineCore.RazorEngineTemplate<RazorEngineCore.Tests.Models.TestModel>
 Hello @Model.Decorator(Model.C)
 ";
 
             var razorEngine = new RazorEngine();
-            var template = razorEngine.Compile<RazorEngineTemplateBase<TestModel>, TestModel>(templateText, builder =>
+            var template = razorEngine.Compile<TestModel>(templateText, builder =>
             {
                 builder.IncludeDebuggingInfo();
             }, TestContext.CancellationToken);

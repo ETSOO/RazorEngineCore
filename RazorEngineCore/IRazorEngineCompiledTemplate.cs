@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace RazorEngineCore
 {
-    public interface IRazorEngineCompiledTemplate<T, M> where T : IRazorEngineTemplate
+    public interface IRazorEngineCompiledTemplate<M>
     {
         void SaveToStream(Stream stream);
 
@@ -18,10 +18,10 @@ namespace RazorEngineCore
 
         string Run(M model);
 
-        string Execute(Action<T> action);
+        string Execute(Action<IRazorEngineTemplate> action);
 
         Task<string> RunAsync(M model);
 
-        Task<string> ExecuteAsync(Action<T> action);
+        Task<string> ExecuteAsync(Action<IRazorEngineTemplate> action);
     }
 }

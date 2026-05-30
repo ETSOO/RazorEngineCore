@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RazorEngineCore.Tests.Models;
 
 namespace RazorEngineCore.Tests
@@ -27,7 +24,7 @@ namespace RazorEngineCore.Tests
         {
             var razorEngine = new RazorEngine();
 
-            var initialTemplate = razorEngine.Compile<TestTemplate2, TestModel>("@{ var message = \"OK\"; }@message",
+            var initialTemplate = razorEngine.Compile<TestModel>("@{ var message = \"OK\"; }@message",
                 builder => { builder.Options.TemplateNamespace = "Test.Namespace"; }, TestContext.CancellationToken);
 
             var result = initialTemplate.Run(new TestModel { });

@@ -12,7 +12,7 @@ namespace RazorEngineCore.Tests
             var razorEngine = new RazorEngine();
             var content = "Hello @Model.Name";
 
-            var template2 = razorEngine.Compile<RazorEngineTemplateBase<NestedTestModel.TestModelInnerClass1.TestModelInnerClass2>, NestedTestModel.TestModelInnerClass1.TestModelInnerClass2>(content, cancellationToken: TestContext.CancellationToken);
+            var template2 = razorEngine.Compile<NestedTestModel.TestModelInnerClass1.TestModelInnerClass2>(content, cancellationToken: TestContext.CancellationToken);
 
             var result = template2.Run(new NestedTestModel.TestModelInnerClass1.TestModelInnerClass2()
             {
@@ -28,7 +28,7 @@ namespace RazorEngineCore.Tests
             var razorEngine = new RazorEngine();
             var content = "Hello @Model.Name";
 
-            var template2 = razorEngine.Compile<RazorEngineTemplateBase<TestModelWithoutNamespace>, TestModelWithoutNamespace>(content, cancellationToken: TestContext.CancellationToken);
+            var template2 = razorEngine.Compile<TestModelWithoutNamespace>(content, cancellationToken: TestContext.CancellationToken);
 
             var result = template2.Run(new TestModelWithoutNamespace()
             {

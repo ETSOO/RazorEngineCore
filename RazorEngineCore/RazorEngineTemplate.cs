@@ -27,7 +27,7 @@ namespace RazorEngineCore
         }
     }
 
-    public abstract class RazorEngineTemplateBase<M> : IRazorEngineTemplate
+    public abstract class RazorEngineTemplate<M> : IRazorEngineTemplate
     {
         /// <summary>
         /// Simulate the Html object in Razor

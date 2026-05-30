@@ -75,11 +75,11 @@ namespace RazorEngineCore.Tests
         public void TestSaveToFile_Typed()
         {
             var razorEngine = new RazorEngine();
-            var initialTemplate = razorEngine.Compile<RazorEngineTemplateBase<TestModel>, TestModel>("Hello @Model.A @Model.C", cancellationToken: TestContext.CancellationToken);
+            var initialTemplate = razorEngine.Compile<TestModel>("Hello @Model.A @Model.C", cancellationToken: TestContext.CancellationToken);
 
             initialTemplate.SaveToFile("testTemplate.dll");
 
-            var loadedTemplate = RazorEngineCompiledTemplate<RazorEngineTemplateBase<TestModel>, TestModel>.LoadFromFile("testTemplate.dll");
+            var loadedTemplate = RazorEngineCompiledTemplate<TestModel>.LoadFromFile("testTemplate.dll");
 
             var model = new TestModel()
             {
