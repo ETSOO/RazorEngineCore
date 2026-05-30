@@ -27,10 +27,10 @@ namespace RazorEngineCore.Tasks
 
             var razorEngine = new RazorEngine();
 
-            var template = razorEngine.Compile<object>(content);
+            var meta = razorEngine.CompileMeta<object>(content);
 
             using var memoryStream = new MemoryStream();
-            template.SaveToStream(memoryStream);
+            meta.WriteAsync(memoryStream).GetAwaiter().GetResult();
             memoryStream.Position = 0;
 
             var outputFile = Path.ChangeExtension(file, ".bin");

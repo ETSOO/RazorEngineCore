@@ -35,7 +35,7 @@ namespace RazorEngineCore
         
         public static async Task<RazorEngineCompiledTemplate<T, M>> LoadFromStreamAsync(Stream stream)
         {
-            return new RazorEngineCompiledTemplate<T, M>(await RazorEngineCompiledTemplateMeta.Read(stream));
+            return new RazorEngineCompiledTemplate<T, M>(await RazorEngineCompiledTemplateMeta.ReadAsync(stream));
         }
 
         public string Run(M model)

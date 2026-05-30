@@ -49,7 +49,7 @@ namespace RazorEngineCore
 
         public Task SaveToStreamAsync(Stream stream)
         {
-            return Meta.Write(stream);
+            return Meta.WriteAsync(stream);
         }
 
         public void EnableDebugging(string? debuggingOutputDirectory = null)

@@ -137,10 +137,10 @@ namespace RazorEngineCore.Tests
 
             await using var memoryStream = new MemoryStream();
 
-            await meta1.Write(memoryStream);
+            await meta1.WriteAsync(memoryStream);
             memoryStream.Position = 0;
 
-            var meta2 = await RazorEngineCompiledTemplateMeta.Read(memoryStream);
+            var meta2 = await RazorEngineCompiledTemplateMeta.ReadAsync(memoryStream);
 
             CollectionAssert.AreEqual(meta1.AssemblyByteCode, meta2.AssemblyByteCode);
             CollectionAssert.AreEqual(meta1.PdbByteCode, meta2.PdbByteCode);
@@ -166,10 +166,10 @@ namespace RazorEngineCore.Tests
 
             await using var memoryStream = new MemoryStream();
 
-            await meta1.Write(memoryStream);
+            await meta1.WriteAsync(memoryStream);
             memoryStream.Position = 0;
 
-            var meta2 = await RazorEngineCompiledTemplateMeta.Read(memoryStream);
+            var meta2 = await RazorEngineCompiledTemplateMeta.ReadAsync(memoryStream);
 
             CollectionAssert.AreEqual(meta1.AssemblyByteCode, meta2.AssemblyByteCode);
             CollectionAssert.AreEqual(meta1.PdbByteCode, meta2.PdbByteCode);

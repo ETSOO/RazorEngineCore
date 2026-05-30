@@ -18,19 +18,19 @@ namespace RazorEngineCore
 
         public string? TemplateFileName { get; set; }
 
-        public async Task Write(Stream stream)
+        public async Task WriteAsync(Stream stream)
         {
             await stream.WriteLong(10001);
 
-            await WriteBuffer(stream, AssemblyByteCode);
-            await WriteBuffer(stream, PdbByteCode);
-            await WriteString(stream, GeneratedSourceCode);
-            await WriteString(stream, TemplateSource);
-            await WriteString(stream, TemplateNamespace);
-            await WriteString(stream, TemplateFileName);
+            await WriteBufferAsync(stream, AssemblyByteCode);
+            await WriteBufferAsync(stream, PdbByteCode);
+            await WriteStringAsync(stream, GeneratedSourceCode);
+            await WriteStringAsync(stream, TemplateSource);
+            await WriteStringAsync(stream, TemplateNamespace);
+            await WriteStringAsync(stream, TemplateFileName);
         }
 
-        public static async Task<RazorEngineCompiledTemplateMeta> Read(Stream stream)
+        public static async Task<RazorEngineCompiledTemplateMeta> ReadAsync(Stream stream)
         {
             long version = await stream.ReadLong();
 
@@ -46,22 +46,22 @@ namespace RazorEngineCore
         {
             return new RazorEngineCompiledTemplateMeta()
             {
-                AssemblyByteCode = await ReadBuffer(stream),
-                PdbByteCode = await ReadBuffer(stream),
-                GeneratedSourceCode = await ReadString(stream),
-                TemplateSource = await ReadString(stream),
-                TemplateNamespace = await ReadString(stream) ?? "TemplateNamespace",
-                TemplateFileName = await ReadString(stream),
+                AssemblyByteCode = await ReadBufferAsync(stream),
+                PdbByteCode = await ReadBufferAsync(stream),
+                GeneratedSourceCode = await ReadStringAsync(stream),
+                TemplateSource = await ReadStringAsync(stream),
+                TemplateNamespace = await ReadStringAsync(stream) ?? "TemplateNamespace",
+                TemplateFileName = await ReadStringAsync(stream),
             };
         }
 
-        private Task WriteString(Stream stream, string? value)
+        private Task WriteStringAsync(Stream stream, string? value)
         {
             var buffer = value == null ? null : Encoding.UTF8.GetBytes(value);
-            return WriteBuffer(stream, buffer);
+            return WriteBufferAsync(stream, buffer);
         }
 
-        private async Task WriteBuffer(Stream stream, byte[]? buffer)
+        private async Task WriteBufferAsync(Stream stream, byte[]? buffer)
         {
             if (buffer == null)
             {
@@ -73,13 +73,13 @@ namespace RazorEngineCore
             await stream.WriteAsync(buffer);
         }
 
-        private static async Task<string?> ReadString(Stream stream)
+        private static async Task<string?> ReadStringAsync(Stream stream)
         {
-            var buffer = await ReadBuffer(stream);
+            var buffer = await ReadBufferAsync(stream);
             return buffer == null ? null : Encoding.UTF8.GetString(buffer);
         }
 
-        private static async Task<byte[]?> ReadBuffer(Stream stream)
+        private static async Task<byte[]?> ReadBufferAsync(Stream stream)
         {
             long length = await stream.ReadLong();
 

@@ -72,7 +72,7 @@ namespace RazorEngineCore
             return Task.Run(() => Compile<T, M>(content: content, builderAction: builderAction, cancellationToken: cancellationToken));
         }
 
-        public IRazorEngineCompiledTemplate<RazorEngineTemplateBase<M>, M> Compile<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
+        public RazorEngineCompiledTemplateMeta CompileMeta<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
         {
             var compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
             compilationOptionsBuilder.Inherits(typeof(RazorEngineTemplateBase<M>));
@@ -91,6 +91,12 @@ namespace RazorEngineCore
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
+            return meta;
+        }
+
+        public IRazorEngineCompiledTemplate<RazorEngineTemplateBase<M>, M> Compile<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
+        {
+            var meta = CompileMeta<M>(content, builderAction, cancellationToken);
             return new RazorEngineCompiledTemplate<M>(meta);
         }
 
