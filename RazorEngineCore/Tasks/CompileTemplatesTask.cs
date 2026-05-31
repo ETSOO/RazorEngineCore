@@ -52,16 +52,23 @@ namespace RazorEngineCore.Tasks
                     .GetFiles(TemplateDir, "*.cshtml", SearchOption.AllDirectories)
                     .ToList();
 
-                foreach (var file in files)
+                System.Threading.Tasks.Parallel.ForEach(files, file =>
                 {
-                    CompileTemplate(file);
-                }
+                    try
+                    {
+                        CompileTemplate(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogErrorFromException(new Exception($"RazorEngineCore compiling template {file} failed", ex));
+                    }
+                });
 
                 return true;
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromException(ex);
+                Log.LogErrorFromException(new Exception("RazorEngineCore Execute Exception", ex));
                 return false;
             }
         }
