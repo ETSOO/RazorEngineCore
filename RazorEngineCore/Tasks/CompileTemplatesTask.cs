@@ -19,9 +19,30 @@ namespace RazorEngineCore.Tasks
         /// </summary>
         public required string TemplateDir { get; set; }
 
+        private bool ShouldCompile(string inputFile, string outputFile)
+        {
+            if (!File.Exists(outputFile))
+            {
+                return true;
+            }
+
+            var inputTime = File.GetLastWriteTimeUtc(inputFile);
+            var outputTime = File.GetLastWriteTimeUtc(outputFile);
+
+            return inputTime > outputTime;
+        }
+
         private void CompileTemplate(string file)
         {
             Log.LogMessage(MessageImportance.High, $"RazorEngineCore compiling template {file} ...");
+
+            var outputFile = Path.ChangeExtension(file, ".bin");
+
+            if (!ShouldCompile(file, outputFile))
+            {
+                Log.LogMessage(MessageImportance.High, $"RazorEngineCore compilation skipped for {file}");
+                return;
+            }
 
             var content = File.ReadAllText(file);
 
@@ -33,7 +54,6 @@ namespace RazorEngineCore.Tasks
             meta.WriteAsync(memoryStream).GetAwaiter().GetResult();
             memoryStream.Position = 0;
 
-            var outputFile = Path.ChangeExtension(file, ".bin");
             using var fileStream = File.Create(outputFile);
             memoryStream.CopyTo(fileStream);
 
