@@ -11,18 +11,21 @@ RazorEngineCore is a modern .NET library that enables dynamic compilation and ex
 ## Key Features
 
 ### 🚀 **Dynamic Template Compilation**
+
 - **Runtime Compilation**: Compile Razor templates at runtime without pre-compilation
 - **Async/Sync Support**: Both synchronous (`Compile`) and asynchronous (`CompileAsync`) compilation methods
 - **Strongly-Typed Models**: Full IntelliSense support with generic type parameters
 - **Dynamic Models**: Flexible runtime type support with `dynamic` keyword
 
 ### ⚡ **High Performance**
+
 - **Built-in Caching**: Automatic template caching mechanism for improved performance
 - **Roslyn-Powered**: Efficient compilation using Microsoft.CodeAnalysis
 - **Optimized Execution**: Minimal memory footprint with streamlined template rendering
 - **Cache Control**: Manual cache management with `ClearCache()` method
 
 ### 🎯 **Model Support**
+
 - **Generic Models**: Strongly-typed models with `Compile<TModel>(template)`
 - **Dynamic Models**: Runtime flexibility with dynamic type support
 - **Complex Types**: Support for nested models, collections, and complex objects
@@ -30,6 +33,7 @@ RazorEngineCore is a modern .NET library that enables dynamic compilation and ex
 - **@model Directives**: Standard Razor `@model` directive support
 
 ### 🔧 **Advanced Customization**
+
 - **Custom Assembly References**: Add external assemblies via `AddAssemblyReference()` and `AddAssemblyReferenceByName()`
 - **Configurable Namespaces**: Custom template namespace configuration
 - **Template Metadata**: Control template filename and metadata
@@ -38,34 +42,23 @@ RazorEngineCore is a modern .NET library that enables dynamic compilation and ex
 - **Cancellation Support**: CancellationToken support for long-running operations
 
 ### 💾 **Template Serialization**
+
 - **Save to Disk**: Persist compiled templates to files for reuse
 - **Load from Stream/File**: Load pre-compiled templates from disk or streams
 - **Faster Startup**: Reduce initialization time by loading pre-compiled templates
 - **Portable Templates**: Share compiled templates across applications
 
 ### 🎨 **Razor Features**
+
 - **HTML Encoding by Default**: Automatic HTML encoding for security
 - **@Html.Raw Support**: Output unencoded HTML when needed
-- **Full Razor Syntax**: Complete Razor syntax support (loops, conditionals, helpers)
-- **Sections and Layouts**: Support for Razor sections and layout pages
+- **Major Razor Syntax**: Major Razor syntax support (loops, conditionals, helpers)
 - **Custom Directives**: Add custom Razor directives as needed
 
-### 🌐 **Internationalization & Standards**
-- **Multi-Language Support**: Satellite resources for English, Simplified Chinese, and Traditional Chinese
-- **UTF-8 Encoding**: Full Unicode support
-- **Cross-Platform**: Works on Windows, Linux, and macOS
-- **.NET 10 Target**: Built specifically for .NET 10 and above
-
-### 🔒 **Security & Quality**
-- **Strong-Name Signed**: Assemblies are digitally signed
-- **MIT Licensed**: Free for commercial and open-source use
-- **Well-Tested**: Comprehensive test suite included
-- **Maintained**: Active development and community support
-
 ### 🛠️ **MSBuild Integration**
+
 - **Build Tasks**: Includes MSBuild tasks (`CompileTemplatesTask`)
 - **Build Targets**: Custom targets file for automated template processing
-- **CI/CD Ready**: Seamless integration with build pipelines
 
 ## Installation
 
@@ -143,8 +136,8 @@ var template = razorEngine.Compile<dynamic>(@"
     <div>@Html.Raw(Model.HtmlContent)</div>
 ");
 
-var result = template.Run(new 
-{ 
+var result = template.Run(new
+{
     Content = "<script>alert('xss')</script>",  // Encoded automatically
     HtmlContent = "<strong>Safe HTML</strong>"   // Rendered as-is with @Html.Raw
 });
@@ -210,15 +203,63 @@ var template = razorEngine.Compile<MyModel>(templateContent, builder =>
 
 ## Enable MSBuild Integration
 
-To enable MSBuild integration, add the following to your project file:
-```xml
-<ItemGroup>
-  <PackageReference Include="Etsoo.RazorEngineCore" Version="x.y.z" />
+To enable MSBuild integration, make sure the project configuration looks like:
 
-  <!-- Enable automatic template compilation before build -->
-  <RazorEngineCore_EnableCompileTemplates>true</RazorEngineCore_EnableCompileTemplates>
-  <RazorEngineCore_TemplateDir>$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
-</ItemGroup>
+```xml
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Install the package -->
+        <PackageReference Include="Etsoo.RazorEngineCore" Version="x.y.z" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <!-- Enable automatic template compilation before build -->
+        <RazorEngineCore_EnableCompileTemplates>true</RazorEngineCore_EnableCompileTemplates>
+        <RazorEngineCore_TemplateDir>$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
+    </PropertyGroup>
+
+</Project>
+```
+
+Then you can preview \*.cshtml files but output a dll file including all compiled templates.
+
+Add template '\*.cshtml' files under "Templates" directory. A utility class to access the compiled template in the project looks like:
+
+```csharp
+public static class TemplateUtils
+{
+    private static readonly ConcurrentDictionary<string, RazorEngineCompiledTemplate<object>?> _cache = new();
+
+    public static RazorEngineCompiledTemplate<object>? Get(string template)
+    {
+        return _cache.GetOrAdd(template, k =>
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            var names = assembly.GetManifestResourceNames();
+
+            // WebTemplates is the project's name
+            var resourceName = $"WebTemplates.Templates.{template.Replace('/', '.')}.bin";
+            if (!names.Contains(resourceName))
+            {
+                return null;
+            }
+
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+            {
+                return null;
+            }
+
+            return RazorEngineCompiledTemplate<object>.LoadFromStream(stream);
+        });
+    }
+}
 ```
 
 ## Requirements
