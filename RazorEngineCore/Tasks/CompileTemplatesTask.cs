@@ -19,6 +19,12 @@ namespace RazorEngineCore.Tasks
         /// </summary>
         public required string TemplateDir { get; set; }
 
+        /// <summary>
+        /// Include debugging info or not
+        /// 是否包含调试信息
+        /// </summary>
+        public bool? IncludeDebuggingInfo { get; set;  }
+
         private bool ShouldCompile(string inputFile, string outputFile)
         {
             if (!File.Exists(outputFile))
@@ -48,7 +54,9 @@ namespace RazorEngineCore.Tasks
 
             var razorEngine = new RazorEngine();
 
-            var meta = razorEngine.CompileMeta<object>(content);
+            var meta = IncludeDebuggingInfo is true ? razorEngine.CompileMeta<object>(content, (options) => {
+                options.IncludeDebuggingInfo();
+            }) : razorEngine.CompileMeta<object>(content);
 
             using var memoryStream = new MemoryStream();
             meta.WriteAsync(memoryStream).GetAwaiter().GetResult();

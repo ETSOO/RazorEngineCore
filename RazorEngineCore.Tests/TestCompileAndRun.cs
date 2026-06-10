@@ -297,6 +297,25 @@ namespace RazorEngineCore.Tests
         }
 
         [TestMethod]
+        public void TestCompileAndRun_NullableBoolProperty()
+        {
+            var razorEngine = new RazorEngine();
+
+            bool? isWindy = null;
+
+            var template = razorEngine.Compile<TestModel>("IsWindy: <b>@(Model.IsWindy == true ? \"Yes\" : \"No\")</b>", (builder) => builder.IncludeDebuggingInfo(), cancellationToken: TestContext.CancellationToken);
+
+            template.EnableDebugging();
+
+            var actual = template.Run(new TestModel()
+            {
+                IsWindy = isWindy
+            });
+
+            Assert.AreEqual("IsWindy: <b>No</b>", actual);
+        }
+
+        [TestMethod]
         public async Task TestCompileAndRun_NullModelAsync()
         {
             var razorEngine = new RazorEngine();

@@ -3,6 +3,7 @@
 
   <PropertyGroup>
 	<RazorEngineCore_TemplateDir Condition="'$(RazorEngineCore_TemplateDir)' == ''">$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
+	<RazorEngineCore_IncludeDebuggingInfo>false</RazorEngineCore_IncludeDebuggingInfo>
 	<RazorEngineCore_EnableCompileTemplates Condition="'$(RazorEngineCore_EnableCompileTemplates)' == ''">false</RazorEngineCore_EnableCompileTemplates>
   </PropertyGroup>
 
@@ -16,11 +17,11 @@
 			 Runtime="NET"
 			 Architecture="x64"/>
 
-  <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="Build" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
-	<CompileTemplatesTask TemplateDir="$(RazorEngineCore_TemplateDir)" />
+  <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="BeforeBuild" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
+	<CompileTemplatesTask TemplateDir="$(RazorEngineCore_TemplateDir)" IncludeDebuggingInfo="$(RazorEngineCore_IncludeDebuggingInfo)" />
   </Target>
 	
-  <Target Name="RazorEngineCoreCleanTemplatesBuild" AfterTargets="Clean" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
+  <Target Name="RazorEngineCoreCleanTemplatesBuild" AfterTargets="AfterClean" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
 	<CleanTemplatesBuildTask TemplateDir="$(RazorEngineCore_TemplateDir)" />
   </Target>
 

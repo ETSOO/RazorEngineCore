@@ -12,6 +12,7 @@ namespace RazorEngineCore.Tests.Models
         public IList<int>? Numbers { get; set; }
         public IList<object>? Objects { get; set; }
         public DateTime? DateTime { get; set; }
+        public bool? IsWindy { get; set; }
 
         public string Decorator(string text)
         {

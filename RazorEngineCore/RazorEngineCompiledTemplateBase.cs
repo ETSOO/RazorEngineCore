@@ -59,7 +59,7 @@ namespace RazorEngineCore
                 throw new RazorEngineException("No debugging info available, compile template with builder.IncludeDebuggingInfo(); option");
             }
 
-            File.WriteAllText(Path.Combine(debuggingOutputDirectory ?? ".", Meta.TemplateFileName), Meta.TemplateSource);
+            File.WriteAllText(Path.Combine(debuggingOutputDirectory ?? ".", Meta.TemplateFileName + ".txt"), Meta.TemplateSource + "\r\n\r\n--------------\r\n\r\n" + Meta.GeneratedSourceCode);
 
             IsDebuggerEnabled = true;
         }
