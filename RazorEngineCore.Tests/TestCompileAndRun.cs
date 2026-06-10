@@ -303,7 +303,7 @@ namespace RazorEngineCore.Tests
 
             bool? isWindy = null;
 
-            var template = razorEngine.Compile<TestModel>("IsWindy: <b>@(Model.IsWindy == true ? \"Yes\" : \"No\")</b>", (builder) => builder.IncludeDebuggingInfo(), cancellationToken: TestContext.CancellationToken);
+            var template = razorEngine.Compile<TestModel>("IsWindy: <b>@(Model.IsWindy is true ? \"Yes\" : \"No\")</b>", (builder) => builder.IncludeDebuggingInfo(), cancellationToken: TestContext.CancellationToken);
 
             template.EnableDebugging();
 
