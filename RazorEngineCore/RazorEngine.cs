@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -19,21 +18,6 @@ namespace RazorEngineCore
     public partial class RazorEngine : IRazorEngine
     {
         private static readonly ConcurrentDictionary<string, RazorEngineCompiledTemplateMeta> templateCache = new();
-
-        private static string? CreateCacheKey(string content, RazorEngineCompilationOptions options, Type modelType, Type? templateType = null)
-        {
-            if (!options.TryCache) return null;
-
-            var key = $"{options.TemplateNamespace}:{options.TemplateFilename}:{modelType}:{templateType}:{options.IncludeDebuggingInfo}:{content}";
-
-            if (key.Length > 10240)
-            {
-                var hash = MD5.HashData(Encoding.UTF8.GetBytes(key));
-                key = Convert.ToHexString(hash);
-            }
-
-            return key;
-        }
 
         /// <summary>
         /// Clears the internal template cache
@@ -49,6 +33,11 @@ namespace RazorEngineCore
         /// </summary>
         public NullableContextOptions NullableContextOptions { get; set; } = NullableContextOptions.Enable;
 
+        /// <summary>
+        /// Gets the specified language version, defaults to Latest
+        /// </summary>
+        public LanguageVersion SpecifiedLanguageVersion { get; set; } = LanguageVersion.Latest;
+
         public RazorEngineCompiledTemplateMeta CompileMeta<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
         {
             var compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
@@ -56,17 +45,7 @@ namespace RazorEngineCore
 
             builderAction?.Invoke(compilationOptionsBuilder);
 
-            var cacheKey = CreateCacheKey(content, compilationOptionsBuilder.Options, typeof(M));
-
-            if (cacheKey == null || !templateCache.TryGetValue(cacheKey, out var meta))
-            {
-                meta = CreateAndCompileToStream(content, compilationOptionsBuilder, cancellationToken);
-                if (cacheKey != null) templateCache[cacheKey] = meta;
-            }
-            else
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-            }
+            var meta = CreateAndCompileToStream(content, compilationOptionsBuilder, cancellationToken);
 
             return meta;
         }
@@ -114,7 +93,14 @@ namespace RazorEngineCore
                 []);
             
             var razorCSharpDocument = codeDocument.GetCSharpDocument();
-            var syntaxTree = CSharpSyntaxTree.ParseText(razorCSharpDocument.GeneratedCode, cancellationToken: cancellationToken);
+
+            var parseOptions = CSharpParseOptions.Default
+                .WithLanguageVersion(SpecifiedLanguageVersion);
+
+            var syntaxTree = CSharpSyntaxTree.ParseText(
+                razorCSharpDocument.GeneratedCode, 
+                parseOptions, 
+                cancellationToken: cancellationToken);
 
             var compilation = CSharpCompilation.Create(
                 fileName,

@@ -88,7 +88,7 @@ namespace RazorEngineCore.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromException(new Exception("RazorEngineCore Execute Exception", ex));
+                Log.LogErrorFromException(new Exception("RazorEngineCore Compiling Execution Exception", ex));
                 return false;
             }
         }
