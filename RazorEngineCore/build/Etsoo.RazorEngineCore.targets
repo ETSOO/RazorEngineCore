@@ -3,7 +3,7 @@
 
   <PropertyGroup>
 	<RazorEngineCore_TemplateDir Condition="'$(RazorEngineCore_TemplateDir)' == ''">$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
-	<RazorEngineCore_IncludeDebuggingInfo>false</RazorEngineCore_IncludeDebuggingInfo>
+	<RazorEngineCore_IncludeDebuggingInfo Condition="'$(RazorEngineCore_IncludeDebuggingInfo)' == ''">false</RazorEngineCore_IncludeDebuggingInfo>
 	<RazorEngineCore_EnableCompileTemplates Condition="'$(RazorEngineCore_EnableCompileTemplates)' == ''">false</RazorEngineCore_EnableCompileTemplates>
   </PropertyGroup>
 
