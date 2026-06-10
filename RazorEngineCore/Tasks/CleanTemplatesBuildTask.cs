@@ -6,7 +6,11 @@ using System.Linq;
 
 namespace RazorEngineCore.Tasks
 {
-    public class ClearTemplatesBuildTask : Task
+    /// <summary>
+    /// Clean compiled Razor templates in the specified project directory
+    /// 清理指定项目目录中的已编译 Razor 模板
+    /// </summary>
+    public class CleanTemplatesBuildTask : Task
     {
         /// <summary>
         /// Template directory
@@ -19,7 +23,7 @@ namespace RazorEngineCore.Tasks
             try
             {
                 // Show a message to indicate that the task is running
-                Log.LogMessage(MessageImportance.High, $"RazorEngineCore AfterClear Task: clearing templates in {TemplateDir} ...");
+                Log.LogMessage(MessageImportance.High, $"RazorEngineCore After Clean Task: cleaning templates in {TemplateDir} ...");
 
                 // Compile all templates in the TemplateDir directory
                 var files = Directory
@@ -35,7 +39,7 @@ namespace RazorEngineCore.Tasks
                     }
                     catch (Exception ex)
                     {
-                        Log.LogErrorFromException(new Exception($"RazorEngineCore clearing template {file} failed", ex));
+                        Log.LogErrorFromException(new Exception($"RazorEngineCore cleaning template {file} failed", ex));
                     }
                 });
 
@@ -43,7 +47,7 @@ namespace RazorEngineCore.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromException(new Exception("RazorEngineCore Clearing Execution Exception", ex));
+                Log.LogErrorFromException(new Exception("RazorEngineCore Cleaning Execution Exception", ex));
                 return false;
             }
         }
