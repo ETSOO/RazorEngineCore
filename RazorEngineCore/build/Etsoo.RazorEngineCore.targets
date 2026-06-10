@@ -17,12 +17,17 @@
 			 Runtime="NET"
 			 Architecture="x64"/>
 
-  <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="Build" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
+  <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="BeforeBuild;CoreCompile" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
 	<CompileTemplatesTask TemplateDir="$(RazorEngineCore_TemplateDir)" IncludeDebuggingInfo="$(RazorEngineCore_IncludeDebuggingInfo)" />
 
+	<GenerateDynamicResource>
+		<Output TaskParameter="GeneratedResources" ItemName="DynamicResources" />
+	</GenerateDynamicResource>
+
 	<ItemGroup>
-		<EmbeddedResource Include="$(RazorEngineCore_TemplateDir)\**\*.bin" />
+		<EmbeddedResource Include="@(DynamicResources)" />
 	</ItemGroup>
+
   </Target>
 	
   <Target Name="RazorEngineCoreCleanTemplatesBuild" AfterTargets="Clean" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">

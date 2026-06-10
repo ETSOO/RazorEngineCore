@@ -1,6 +1,7 @@
 ﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -24,6 +25,11 @@ namespace RazorEngineCore.Tasks
         /// 是否包含调试信息
         /// </summary>
         public bool IncludeDebuggingInfo { get; set;  }
+
+        private readonly List<ITaskItem> resources = [];
+
+        [Output]
+        public ITaskItem[] GeneratedResources => [.. resources];
 
         private bool ShouldCompile(string inputFile, string outputFile)
         {
@@ -64,6 +70,9 @@ namespace RazorEngineCore.Tasks
 
             using var fileStream = File.Create(outputFile);
             memoryStream.CopyTo(fileStream);
+
+            var taskItem = new TaskItem(outputFile);
+            resources.Add(taskItem);
 
             Log.LogMessage(MessageImportance.High, $"RazorEngineCore compiled template {file} to {outputFile}");
         }
