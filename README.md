@@ -17,13 +17,6 @@ RazorEngineCore is a modern .NET library that enables dynamic compilation and ex
 - **Strongly-Typed Models**: Full IntelliSense support with generic type parameters
 - **Dynamic Models**: Flexible runtime type support with `dynamic` keyword
 
-### ⚡ **High Performance**
-
-- **Built-in Caching**: Automatic template caching mechanism for improved performance
-- **Roslyn-Powered**: Efficient compilation using Microsoft.CodeAnalysis
-- **Optimized Execution**: Minimal memory footprint with streamlined template rendering
-- **Cache Control**: Manual cache management with `ClearCache()` method
-
 ### 🎯 **Model Support**
 
 - **Generic Models**: Strongly-typed models with `Compile<TModel>(template)`
@@ -220,6 +213,7 @@ To enable MSBuild integration, make sure the project configuration looks like:
     <PropertyGroup>
         <!-- Enable automatic template compilation before build -->
         <RazorEngineCore_EnableCompileTemplates>true</RazorEngineCore_EnableCompileTemplates>
+        <RazorEngineCore_IncludeDebuggingInfo>false</RazorEngineCore_IncludeDebuggingInfo>
         <RazorEngineCore_TemplateDir>$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
     </PropertyGroup>
 

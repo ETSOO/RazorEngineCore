@@ -23,7 +23,7 @@ namespace RazorEngineCore.Tasks
         /// Include debugging info or not
         /// 是否包含调试信息
         /// </summary>
-        public bool? IncludeDebuggingInfo { get; set;  }
+        public bool IncludeDebuggingInfo { get; set;  }
 
         private bool ShouldCompile(string inputFile, string outputFile)
         {
@@ -54,7 +54,7 @@ namespace RazorEngineCore.Tasks
 
             var razorEngine = new RazorEngine();
 
-            var meta = IncludeDebuggingInfo is true ? razorEngine.CompileMeta<object>(content, (options) => {
+            var meta = IncludeDebuggingInfo ? razorEngine.CompileMeta<object>(content, (options) => {
                 options.IncludeDebuggingInfo();
             }) : razorEngine.CompileMeta<object>(content);
 
