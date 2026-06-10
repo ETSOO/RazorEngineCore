@@ -8,13 +8,13 @@
 
   <UsingTask TaskName="RazorEngineCore.Tasks.CompileTemplatesTask"
 			 AssemblyFile="$(MSBuildThisFileDirectory)..\lib\net10.0\RazorEngineCore.dll"
-			 Runtime="*"
-			 Architecture="*"/>
+			 Runtime="NET"
+			 Architecture="x64"/>
 	
   <UsingTask TaskName="RazorEngineCore.Tasks.CleanTemplatesBuildTask"
 			 AssemblyFile="$(MSBuildThisFileDirectory)..\lib\net10.0\RazorEngineCore.dll"
-			 Runtime="*"
-			 Architecture="*"/>
+			 Runtime="NET"
+			 Architecture="x64"/>
 
   <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="Build" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
 	<CompileTemplatesTask TemplateDir="$(RazorEngineCore_TemplateDir)" />
