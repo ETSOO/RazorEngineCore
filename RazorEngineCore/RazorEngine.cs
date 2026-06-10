@@ -44,6 +44,11 @@ namespace RazorEngineCore
             templateCache.Clear();
         }
 
+        /// <summary>
+        /// Global Nullable context options, defaults to Enable
+        /// </summary>
+        public NullableContextOptions NullableContextOptions { get; set; } = NullableContextOptions.Enable;
+
         public RazorEngineCompiledTemplateMeta CompileMeta<M>(string content, Action<IRazorEngineCompilationOptionsBuilder>? builderAction = null, CancellationToken cancellationToken = default)
         {
             var compilationOptionsBuilder = new RazorEngineCompilationOptionsBuilder();
@@ -135,6 +140,7 @@ namespace RazorEngineCore
                 ],
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                     .WithOptimizationLevel(OptimizationLevel.Release)
+                    .WithNullableContextOptions(NullableContextOptions)
                     .WithOverflowChecks(true));
 
             var assemblyStream = new MemoryStream();
