@@ -17,11 +17,15 @@
 			 Runtime="NET"
 			 Architecture="x64"/>
 
-  <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="BeforeBuild" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
+  <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="Build" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
 	<CompileTemplatesTask TemplateDir="$(RazorEngineCore_TemplateDir)" IncludeDebuggingInfo="$(RazorEngineCore_IncludeDebuggingInfo)" />
+
+	<ItemGroup>
+		<EmbeddedResource Include="$(RazorEngineCore_TemplateDir)\**\*.bin" />
+	</ItemGroup>
   </Target>
 	
-  <Target Name="RazorEngineCoreCleanTemplatesBuild" AfterTargets="AfterClean" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
+  <Target Name="RazorEngineCoreCleanTemplatesBuild" AfterTargets="Clean" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
 	<CleanTemplatesBuildTask TemplateDir="$(RazorEngineCore_TemplateDir)" />
   </Target>
 
