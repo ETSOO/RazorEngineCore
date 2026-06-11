@@ -280,6 +280,27 @@ namespace RazorEngineCore.Tests
         }
 
         [TestMethod]
+        public void TestCompileAndRun_NullablePropertyWithValueObject()
+        {
+            var razorEngine = new RazorEngine();
+
+            DateTime? dateTime = DateTime.Now;
+
+            // Why here is '@Model.DateTime.ToString()' instead of '@Model.DateTime.Value.ToString()'?
+            // Because the compiled template use the type 'object', actually 'dynamic' to pass the build
+            // So no nullable types, like 'DateTime?' are used in the compiled template
+            var template = razorEngine.Compile<object>("DateTime: @Model.DateTime.ToString()", (builder) => builder.IncludeDebuggingInfo(), cancellationToken: TestContext.CancellationToken);
+            template.EnableDebugging();
+
+            var actual = template.Run(new TestModel()
+            {
+                DateTime = dateTime
+            });
+
+            Assert.AreEqual("DateTime: " + dateTime, actual);
+        }
+
+        [TestMethod]
         public void TestCompileAndRun_NullablePropertyWithoutValue()
         {
             var razorEngine = new RazorEngine();

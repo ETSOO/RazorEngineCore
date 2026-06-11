@@ -147,22 +147,6 @@ var template = razorEngine.Compile<MyModel>("@Model.CustomMethod()", builder =>
 });
 ```
 
-### Template Caching
-
-```csharp
-// Caching is enabled by default
-var razorEngine = new RazorEngine();
-
-// First compilation - template is cached
-var template1 = razorEngine.Compile<Person>("Hello @Model.Name!");
-
-// Second compilation - retrieved from cache (much faster)
-var template2 = razorEngine.Compile<Person>("Hello @Model.Name!");
-
-// Clear cache if needed
-RazorEngine.ClearCache();
-```
-
 ### Save and Load Compiled Templates
 
 ```csharp
@@ -213,6 +197,7 @@ To enable MSBuild integration, make sure the project configuration looks like:
     <PropertyGroup>
         <!-- Enable automatic template compilation before build -->
         <RazorEngineCore_EnableCompileTemplates>true</RazorEngineCore_EnableCompileTemplates>
+		<!-- Enable debugging -->
         <RazorEngineCore_IncludeDebuggingInfo>false</RazorEngineCore_IncludeDebuggingInfo>
         <RazorEngineCore_TemplateDir>$(MSBuildProjectDirectory)\Templates</RazorEngineCore_TemplateDir>
     </PropertyGroup>
@@ -222,7 +207,7 @@ To enable MSBuild integration, make sure the project configuration looks like:
 
 Then you can preview \*.cshtml files but output a dll file including all compiled templates.
 
-Add template '\*.cshtml' files under "Templates" directory. A utility class to access the compiled template in the project looks like:
+Add template '\*.cshtml' files under "Templates" directory, only limitation is the model type cannot support nullable types (DateTime?, int?). A utility class to access the compiled template in the project looks like:
 
 ```csharp
 public static class TemplateUtils

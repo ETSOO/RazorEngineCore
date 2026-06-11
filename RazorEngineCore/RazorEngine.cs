@@ -29,9 +29,10 @@ namespace RazorEngineCore
         }
 
         /// <summary>
-        /// Global Nullable context options, defaults to Enable
+        /// Disable global Nullable context or not, defaults to Enable
+        /// 是否禁用全局 Nullable 上下文，默认为 Enable
         /// </summary>
-        public NullableContextOptions NullableContextOptions { get; set; } = NullableContextOptions.Enable;
+        public bool NullableContextDisabled { get; set; }
 
         /// <summary>
         /// Gets the specified language version, defaults to Latest
@@ -126,7 +127,7 @@ namespace RazorEngineCore
                 ],
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                     .WithOptimizationLevel(OptimizationLevel.Release)
-                    .WithNullableContextOptions(NullableContextOptions)
+                    .WithNullableContextOptions(NullableContextDisabled ? NullableContextOptions.Disable : NullableContextOptions.Enable)
                     .WithOverflowChecks(true));
 
             var assemblyStream = new MemoryStream();
@@ -191,6 +192,7 @@ namespace RazorEngineCore
             var stringBuilder = new StringBuilder();
 
             // For dynamic object, replace System.Object with dynamic to pass the build.
+            // But dynamic and Nullable Reference Types are not compatible, means 'int?' cannot be checked, replace it with 'int'.
             stringBuilder.AppendLine($"@inherits {options.Inherits.Replace("<System.Object>", "<dynamic>")}");
 
             foreach (var entry in options.DefaultUsings)
