@@ -1,6 +1,7 @@
 ﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 
@@ -17,6 +18,11 @@ namespace RazorEngineCore.Tasks
         /// 模板目录
         /// </summary>
         public required string TemplateDir { get; set; }
+
+        private readonly ConcurrentBag<ITaskItem> cleanedResources = [];
+
+        [Output]
+        public ITaskItem[] CleanedResources => [.. cleanedResources];
 
         public override bool Execute()
         {
@@ -35,7 +41,12 @@ namespace RazorEngineCore.Tasks
                     try
                     {
                         var outputFile = Path.ChangeExtension(file, ".bin");
-                        File.Delete(outputFile);
+                        if (File.Exists(outputFile))
+                        {
+                            File.Delete(outputFile);
+                            cleanedResources.Add(new TaskItem(outputFile));
+                            Log.LogMessage(MessageImportance.High, $"RazorEngineCore deleted compiled template {outputFile}");
+                        }
                     }
                     catch (Exception ex)
                     {

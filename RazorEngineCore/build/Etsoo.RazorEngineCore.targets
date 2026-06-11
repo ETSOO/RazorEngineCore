@@ -29,7 +29,13 @@
   </Target>
 	
   <Target Name="RazorEngineCoreCleanTemplatesBuild" AfterTargets="AfterClean" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
-	<CleanTemplatesBuildTask TemplateDir="$(RazorEngineCore_TemplateDir)" />
+	<CleanTemplatesBuildTask TemplateDir="$(RazorEngineCore_TemplateDir)">
+		<Output TaskParameter="CleanedResources" ItemName="CleanedDynamicResources" />
+	</CleanTemplatesBuildTask>
+
+	<ItemGroup>
+		<EmbeddedResource Remove="@(CleanedDynamicResources)" />
+	</ItemGroup>
   </Target>
 
 </Project>
