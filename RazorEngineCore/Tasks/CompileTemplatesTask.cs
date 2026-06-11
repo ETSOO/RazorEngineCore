@@ -1,6 +1,7 @@
 ﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace RazorEngineCore.Tasks
         /// </summary>
         public bool IncludeDebuggingInfo { get; set;  }
 
-        private readonly List<ITaskItem> resources = [];
+        private readonly ConcurrentBag<ITaskItem> resources = [];
 
         [Output]
         public ITaskItem[] GeneratedResources => [.. resources];
@@ -53,6 +54,7 @@ namespace RazorEngineCore.Tasks
             if (!ShouldCompile(file, outputFile))
             {
                 Log.LogMessage(MessageImportance.High, $"RazorEngineCore compilation skipped for {file}");
+                resources.Add(new TaskItem(outputFile));
                 return;
             }
 
@@ -101,7 +103,7 @@ namespace RazorEngineCore.Tasks
                     }
                 });
 
-                return true;
+                return !Log.HasLoggedErrors;
             }
             catch (Exception ex)
             {

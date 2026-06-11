@@ -17,7 +17,7 @@
 			 Runtime="NET"
 			 Architecture="x64"/>
 
-  <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="BeforeBuild;CoreCompile" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
+  <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="PrepareForBuild" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
 	<CompileTemplatesTask TemplateDir="$(RazorEngineCore_TemplateDir)" IncludeDebuggingInfo="$(RazorEngineCore_IncludeDebuggingInfo)">
 		<Output TaskParameter="GeneratedResources" ItemName="DynamicResources" />
 	</CompileTemplatesTask>
@@ -28,7 +28,7 @@
 
   </Target>
 	
-  <Target Name="RazorEngineCoreCleanTemplatesBuild" AfterTargets="Clean" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
+  <Target Name="RazorEngineCoreCleanTemplatesBuild" AfterTargets="AfterClean" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
 	<CleanTemplatesBuildTask TemplateDir="$(RazorEngineCore_TemplateDir)" />
   </Target>
 
