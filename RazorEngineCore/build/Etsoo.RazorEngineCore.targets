@@ -11,11 +11,6 @@
 			 AssemblyFile="$(MSBuildThisFileDirectory)..\lib\net10.0\RazorEngineCore.dll"
 			 Runtime="NET"
 			 Architecture="x64"/>
-	
-  <UsingTask TaskName="RazorEngineCore.Tasks.CleanTemplatesBuildTask"
-			 AssemblyFile="$(MSBuildThisFileDirectory)..\lib\net10.0\RazorEngineCore.dll"
-			 Runtime="NET"
-			 Architecture="x64"/>
 
   <Target Name="RazorEngineCoreCompileTemplates" BeforeTargets="PrepareForBuild" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
 	<CompileTemplatesTask TemplateDir="$(RazorEngineCore_TemplateDir)" IncludeDebuggingInfo="$(RazorEngineCore_IncludeDebuggingInfo)">
@@ -28,14 +23,4 @@
 
   </Target>
 	
-  <Target Name="RazorEngineCoreCleanTemplatesBuild" AfterTargets="AfterClean" Condition="'$(RazorEngineCore_EnableCompileTemplates)' == 'true'">
-	<CleanTemplatesBuildTask TemplateDir="$(RazorEngineCore_TemplateDir)">
-		<Output TaskParameter="CleanedResources" ItemName="CleanedDynamicResources" />
-	</CleanTemplatesBuildTask>
-
-	<ItemGroup>
-		<EmbeddedResource Remove="@(CleanedDynamicResources)" />
-	</ItemGroup>
-  </Target>
-
 </Project>
