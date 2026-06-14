@@ -46,13 +46,12 @@ namespace RazorEngineCore.Tasks
 
         private void CompileTemplate(string file)
         {
-            Log.LogMessage(MessageImportance.High, $"RazorEngineCore compiling template {file} ...");
-
             var outputFile = Path.ChangeExtension(file, ".bin");
 
             if (!ShouldCompile(file, outputFile))
             {
-                Log.LogMessage(MessageImportance.High, $"RazorEngineCore compilation skipped for {file}");
+                // Avoid excessive messages
+                // Log.LogMessage(MessageImportance.High, $"RazorEngineCore compilation skipped for {file}");
                 resources.Add(new TaskItem(outputFile));
                 return;
             }
@@ -83,7 +82,7 @@ namespace RazorEngineCore.Tasks
             try
             {
                 // Show a message to indicate that the task is running
-                Log.LogMessage(MessageImportance.High, $"RazorEngineCore BeforeBuild Task: compiling templates in {TemplateDir} ...");
+                Log.LogMessage(MessageImportance.High, $"RazorEngineCore Task: compiling templates in {TemplateDir} ...");
 
                 // Compile all templates in the TemplateDir directory
                 var files = Directory
@@ -101,6 +100,8 @@ namespace RazorEngineCore.Tasks
                         Log.LogErrorFromException(new Exception($"RazorEngineCore compiling template {file} failed", ex));
                     }
                 });
+
+                Log.LogMessage(MessageImportance.High, $"RazorEngineCore Task: finished compiling templates in {TemplateDir}");
 
                 return !Log.HasLoggedErrors;
             }
