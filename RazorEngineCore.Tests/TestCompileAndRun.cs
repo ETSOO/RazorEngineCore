@@ -25,6 +25,13 @@ namespace RazorEngineCore.Tests
         }
 
         [TestMethod]
+        public void TestDateTimeCompile()
+        {
+            var razorEngine = new RazorEngine();
+            razorEngine.Compile<TestNameModel>("<span>@DateTime.Now.ToLongDateString()</span>", cancellationToken: TestContext.CancellationToken);
+        }
+
+        [TestMethod]
         public Task TestCompileAsync()
         {
             var razorEngine = new RazorEngine();

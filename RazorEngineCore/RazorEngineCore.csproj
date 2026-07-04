@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
-		<Version>1.0.39</Version>
+		<Version>1.0.40</Version>
 		<Nullable>enable</Nullable>
 		<Authors>Alexander Selishchev, Simon Mourier, William David Cossey, Benjamin Smith, Dag H. Baardsen, krmr, jddj007-hydra, shehrozeee, TheAtomicOption, ItWorksOnMyMachine, garryxiao</Authors>
 		<PackageProjectUrl>https://github.com/etsoo/RazorEngineCore</PackageProjectUrl>
@@ -41,6 +41,6 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="6.0.36" />
 		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.7.1" ExcludeAssets="runtime" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" ExcludeAssets="runtime" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" ExcludeAssets="runtime" />
 	</ItemGroup>
 </Project>

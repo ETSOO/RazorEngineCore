@@ -36,6 +36,7 @@ namespace RazorEngineCore
 
         public HashSet<string> DefaultUsings { get; set; } =
         [
+            "System",
             "System.Linq",
             "System.Collections",
             "System.Collections.Generic"
